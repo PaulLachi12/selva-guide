@@ -9,13 +9,16 @@ import {
 import { obtenerPuntos } from '../../src/data/puntosData';
 import DetallePuntoModal from '../../src/components/DetallePuntoModal';
 import DrawerMenuModal from '../../src/components/DrawerMenuModal';
+import ScreenHeader from '../../src/components/ScreenHeader';
+import Icon from '../../src/components/Icon';
+import { colors, space, radius, shadow } from '../../src/theme';
 
-const VERDE_N = '#075E54';
-const VERDE_B = '#128C7E';
-const BLANCO = '#FFFFFF';
-const TINTA = '#1C1C1E';
-const GRIS = '#64748B';
-const CREMA = '#F8FAFC';
+const VERDE_N = colors.primary;
+const VERDE_B = colors.primary;
+const BLANCO = colors.surface;
+const TINTA = colors.text;
+const GRIS = colors.textMuted;
+const CREMA = colors.bg;
 
 export default function ExperienciasScreen() {
   const puntos = obtenerPuntos();
@@ -44,17 +47,7 @@ export default function ExperienciasScreen() {
     <View style={styles.contenedor}>
       {/* Header con botón Drawer */}
       <View style={styles.header}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Pressable onPress={() => setDrawerVisible(true)} style={styles.btnMenu}>
-            <Text style={styles.btnMenuTexto}>☰</Text>
-          </Pressable>
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.headerTitulo}>🌿 Experiencias y Rutas</Text>
-            <Text style={styles.headerSub}>
-              Expediciones en trocha, paseos fluviales y selva virgen
-            </Text>
-          </View>
-        </View>
+        <ScreenHeader embedded title="Rutas y experiencias" subtitle="Excursiones, paseos por el río y selva" onMenu={() => setDrawerVisible(true)} />
       </View>
 
       {/* Filtros */}
@@ -89,7 +82,7 @@ export default function ExperienciasScreen() {
             <View style={styles.cardTop}>
               <View style={[styles.badge, item.categoria === 'deportivo' ? styles.badgeExtremo : styles.badgeNaturaleza]}>
                 <Text style={styles.badgeTexto}>
-                  {item.categoria === 'deportivo' ? '⚡ Adrenalina' : '🍃 Naturaleza'}
+                  {item.categoria === 'deportivo' ? ' Adrenalina' : ' Naturaleza'}
                 </Text>
               </View>
               <Text style={styles.dificultadTexto}>Nivel: {item.dificultad}</Text>
@@ -99,8 +92,8 @@ export default function ExperienciasScreen() {
             <Text style={styles.cardDesc}>{item.descripcionCorta}</Text>
 
             <View style={styles.infoRow}>
-              <Text style={styles.infoItem}>⏱️ {item.horario || 'Diario'}</Text>
-              <Text style={styles.infoItem}>📍 {item.distancia}</Text>
+              <Text style={styles.infoItem}>⏱ {item.horario || 'Diario'}</Text>
+              <Text style={styles.infoItem}>{item.distancia}</Text>
             </View>
 
             <View style={styles.footerCard}>
@@ -134,10 +127,9 @@ const styles = StyleSheet.create({
     backgroundColor: CREMA,
   },
   header: {
-    backgroundColor: VERDE_N,
-    paddingTop: 52,
-    paddingBottom: 16,
+    backgroundColor: colors.bg,
     paddingHorizontal: 16,
+    paddingBottom: 8,
   },
   btnMenu: {
     padding: 8,
@@ -147,11 +139,11 @@ const styles = StyleSheet.create({
   btnMenuTexto: {
     fontSize: 20,
     color: BLANCO,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   headerTitulo: {
     fontSize: 20,
-    fontWeight: '800',
+    fontWeight: '700',
     color: BLANCO,
   },
   headerSub: {
@@ -164,13 +156,13 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: BLANCO,
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: colors.border,
   },
   btnFiltro: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: colors.surfaceMuted,
     marginRight: 8,
   },
   btnFiltroActivo: {
@@ -197,7 +189,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
   },
   cardTop: {
     flexDirection: 'row',
@@ -226,7 +218,7 @@ const styles = StyleSheet.create({
   },
   cardTitulo: {
     fontSize: 17,
-    fontWeight: '800',
+    fontWeight: '700',
     color: TINTA,
     marginTop: 8,
   },
@@ -251,7 +243,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 14,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: colors.surfaceMuted,
     paddingTop: 10,
   },
   costoTexto: {

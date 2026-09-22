@@ -11,13 +11,16 @@ import {
 import { useRouter } from 'expo-router';
 import { agregarPunto } from '../../src/data/puntosData';
 import DrawerMenuModal from '../../src/components/DrawerMenuModal';
+import ScreenHeader from '../../src/components/ScreenHeader';
+import Icon from '../../src/components/Icon';
+import { colors, space, radius, shadow } from '../../src/theme';
 
-const VERDE_N = '#075E54';
-const VERDE_B = '#128C7E';
-const BLANCO = '#FFFFFF';
-const TINTA = '#1C1C1E';
-const GRIS = '#64748B';
-const LINEA = '#CBD5E1';
+const VERDE_N = colors.primary;
+const VERDE_B = colors.primary;
+const BLANCO = colors.surface;
+const TINTA = colors.text;
+const GRIS = colors.textMuted;
+const LINEA = colors.border;
 
 export default function NuevoPuntoScreen() {
   const router = useRouter();
@@ -116,20 +119,7 @@ export default function NuevoPuntoScreen() {
     <View style={styles.contenedor}>
       {/* Header con botón Drawer y Volver */}
       <View style={styles.header}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Pressable onPress={() => setDrawerVisible(true)} style={styles.btnMenu}>
-            <Text style={styles.btnMenuTexto}>☰</Text>
-          </Pressable>
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.headerTitulo}>🔒 Panel Admin (Nuevo Punto)</Text>
-            <Text style={styles.headerSub}>
-              Añade puntos turísticos o gastronómicos al mapa
-            </Text>
-          </View>
-          <Pressable onPress={() => router.push('/(tabs)')} style={styles.btnVolver}>
-            <Text style={styles.btnVolverTexto}>Mapa 🗺️</Text>
-          </Pressable>
-        </View>
+        <ScreenHeader embedded title="Agregar lugar" subtitle="Publica un punto turístico o gastronómico" onMenu={() => setDrawerVisible(true)} />
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
@@ -293,7 +283,7 @@ export default function NuevoPuntoScreen() {
           <View style={styles.galeriaBox}>
             {fotosSimuladas.map((f, i) => (
               <View key={i} style={styles.fotoChip}>
-                <Text style={styles.fotoChipTexto}>📷 {f}</Text>
+                <Text style={styles.fotoChipTexto}>{f}</Text>
               </View>
             ))}
             <Pressable onPress={agregarFotoSimulada} style={styles.btnAgregarFoto}>
@@ -303,7 +293,7 @@ export default function NuevoPuntoScreen() {
 
           {/* Botón de Guardado */}
           <Pressable onPress={guardarDestino} style={styles.btnGuardar}>
-            <Text style={styles.btnGuardarTexto}>💾 Guardar y Publicar en el Mapa</Text>
+            <Text style={styles.btnGuardarTexto}>Guardar y Publicar en el Mapa</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -321,13 +311,12 @@ export default function NuevoPuntoScreen() {
 const styles = StyleSheet.create({
   contenedor: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.bg,
   },
   header: {
-    backgroundColor: '#1E293B',
-    paddingTop: 52,
-    paddingBottom: 16,
+    backgroundColor: colors.bg,
     paddingHorizontal: 16,
+    paddingBottom: 8,
   },
   btnMenu: {
     padding: 8,
@@ -337,7 +326,7 @@ const styles = StyleSheet.create({
   btnMenuTexto: {
     fontSize: 20,
     color: BLANCO,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   btnVolver: {
     backgroundColor: VERDE_B,
@@ -352,12 +341,12 @@ const styles = StyleSheet.create({
   },
   headerTitulo: {
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '700',
     color: BLANCO,
   },
   headerSub: {
     fontSize: 11,
-    color: '#94A3B8',
+    color: colors.textSubtle,
     marginTop: 2,
   },
   scroll: {
@@ -368,7 +357,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 18,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -376,7 +365,7 @@ const styles = StyleSheet.create({
   },
   cardTitulo: {
     fontSize: 17,
-    fontWeight: '800',
+    fontWeight: '700',
     color: TINTA,
     marginBottom: 16,
   },
@@ -412,9 +401,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 8,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: colors.surfaceMuted,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
   },
   btnCatActivo: {
     backgroundColor: VERDE_B,
@@ -438,13 +427,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     padding: 10,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.bg,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
   },
   fotoChip: {
-    backgroundColor: '#E2E8F0',
+    backgroundColor: colors.border,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 6,
@@ -479,6 +468,6 @@ const styles = StyleSheet.create({
   btnGuardarTexto: {
     color: BLANCO,
     fontSize: 15,
-    fontWeight: '800',
+    fontWeight: '700',
   },
 });

@@ -9,13 +9,16 @@ import {
 import { obtenerPuntos, suscribirPuntos } from '../../src/data/puntosData';
 import DetallePuntoModal from '../../src/components/DetallePuntoModal';
 import DrawerMenuModal from '../../src/components/DrawerMenuModal';
+import ScreenHeader from '../../src/components/ScreenHeader';
+import Icon from '../../src/components/Icon';
+import { colors, space, radius, shadow } from '../../src/theme';
 
-const VERDE_N = '#075E54';
-const VERDE_B = '#128C7E';
-const BLANCO = '#FFFFFF';
-const TINTA = '#1C1C1E';
-const GRIS = '#64748B';
-const CREMA = '#F8FAFC';
+const VERDE_N = colors.primary;
+const VERDE_B = colors.primary;
+const BLANCO = colors.surface;
+const TINTA = colors.text;
+const GRIS = colors.textMuted;
+const CREMA = colors.bg;
 
 export default function ResenasScreen() {
   const [puntos, setPuntos] = useState(obtenerPuntos());
@@ -52,17 +55,7 @@ export default function ResenasScreen() {
     <View style={styles.contenedor}>
       {/* Header con botón Drawer */}
       <View style={styles.header}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Pressable onPress={() => setDrawerVisible(true)} style={styles.btnMenu}>
-            <Text style={styles.btnMenuTexto}>☰</Text>
-          </Pressable>
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.headerTitulo}>⭐ Reseñas de la Comunidad</Text>
-            <Text style={styles.headerSub}>
-              Experiencias y valoraciones de turistas en Iquitos
-            </Text>
-          </View>
-        </View>
+        <ScreenHeader embedded title="Reseñas" subtitle="Opiniones de viajeros en Iquitos" onMenu={() => setDrawerVisible(true)} />
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
@@ -73,7 +66,7 @@ export default function ResenasScreen() {
               style={styles.lugarBadge}
             >
               <Text style={styles.lugarNombre} numberOfLines={1}>
-                📍 {resena.lugarNombre}
+                 {resena.lugarNombre}
               </Text>
               <Text style={styles.lugarLink}>Ver lugar →</Text>
             </Pressable>
@@ -86,7 +79,7 @@ export default function ResenasScreen() {
                 <Text style={styles.autorNombre}>{resena.autor}</Text>
                 <Text style={styles.fecha}>{resena.fecha || 'Reciente'}</Text>
               </View>
-              <Text style={styles.ratingStars}>{'★'.repeat(resena.rating || 5)}</Text>
+              <Text style={styles.ratingStars}>{''.repeat(resena.rating || 5)}</Text>
             </View>
 
             <Text style={styles.comentario}>"{resena.comentario}"</Text>
@@ -117,10 +110,9 @@ const styles = StyleSheet.create({
     backgroundColor: CREMA,
   },
   header: {
-    backgroundColor: VERDE_N,
-    paddingTop: 52,
-    paddingBottom: 16,
+    backgroundColor: colors.bg,
     paddingHorizontal: 16,
+    paddingBottom: 8,
   },
   btnMenu: {
     padding: 8,
@@ -130,11 +122,11 @@ const styles = StyleSheet.create({
   btnMenuTexto: {
     fontSize: 20,
     color: BLANCO,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   headerTitulo: {
     fontSize: 20,
-    fontWeight: '800',
+    fontWeight: '700',
     color: BLANCO,
   },
   headerSub: {
@@ -155,13 +147,13 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
   },
   lugarBadge: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
+    backgroundColor: colors.surfaceMuted,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,

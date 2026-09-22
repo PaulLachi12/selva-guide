@@ -10,14 +10,17 @@ import {
 } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import DrawerMenuModal from '../../src/components/DrawerMenuModal';
+import ScreenHeader from '../../src/components/ScreenHeader';
+import Icon from '../../src/components/Icon';
+import { colors, space, radius, shadow } from '../../src/theme';
 
-const VERDE = '#075E54';
-const VERDE_CLARO = '#25D366';
-const CREMA = '#F0F2F5';
-const BLANCO = '#FFFFFF';
-const TINTA = '#222222';
-const GRIS = '#64748B';
-const LINEA = '#E2E8F0';
+const VERDE = colors.primary;
+const VERDE_CLARO = colors.primary;
+const CREMA = colors.bg;
+const BLANCO = colors.surface;
+const TINTA = colors.text;
+const GRIS = colors.textMuted;
+const LINEA = colors.border;
 
 const ZONAS = [
   { id: 'centro', nombre: 'Iquitos Centro & Malecón', desc: 'Belén, Casonas del Caucho, Malecón Tarapacá', tam: '18 MB', paquetes: 4 },
@@ -26,11 +29,11 @@ const ZONAS = [
 ];
 
 const RETOS_PASAPORTE = [
-  { id: 'suri', titulo: 'Comer un suri asado', desc: 'En Bellavista Nanay o Mercado de Belén', icono: '🐛' },
-  { id: 'peke', titulo: 'Navegar en peke-peke', desc: 'Surcar el Nanay o el Itaya en bote tradicional', icono: '🚤' },
-  { id: 'juane', titulo: 'Desatar un juane en bijao', desc: 'Tradición gastronómica amazónica con ají de cocona', icono: '🫔' },
-  { id: 'manati', titulo: 'Visitar los manatíes en el CREA', desc: 'Conocer el centro de rescate de fauna silvestre', icono: '🦭' },
-  { id: 'tarantula', titulo: 'Expedición nocturna en la selva', desc: 'Avistamiento de fauna con linternas de campo', icono: '🕷️' },
+  { id: 'suri', titulo: 'Comer un suri asado', desc: 'En Bellavista Nanay o Mercado de Belén', icono: 'bonfire-outline' },
+  { id: 'peke', titulo: 'Navegar en peke-peke', desc: 'Surcar el Nanay o el Itaya en bote tradicional', icono: 'boat-outline' },
+  { id: 'juane', titulo: 'Desatar un juane en bijao', desc: 'Tradición gastronómica amazónica con ají de cocona', icono: 'leaf-outline' },
+  { id: 'manati', titulo: 'Visitar los manatíes en el CREA', desc: 'Conocer el centro de rescate de fauna silvestre', icono: 'water-outline' },
+  { id: 'tarantula', titulo: 'Expedición nocturna en la selva', desc: 'Avistamiento de fauna con linternas de campo', icono: 'moon-outline' },
 ];
 
 export default function MochilaScreen() {
@@ -65,17 +68,7 @@ export default function MochilaScreen() {
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Header */}
         <View style={styles.header}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Pressable onPress={() => setDrawerVisible(true)} style={styles.btnMenu}>
-              <Text style={styles.btnMenuTexto}>☰</Text>
-            </Pressable>
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <Text style={styles.headerTitulo}>🎒 Mi Mochila & Pasaporte</Text>
-              <Text style={styles.headerSub}>
-                Datos sin internet (SQLite) y sellos del viaje
-              </Text>
-            </View>
-          </View>
+          <ScreenHeader embedded title="Mochila" subtitle="Contenido sin conexión y tu progreso" onMenu={() => setDrawerVisible(true)} />
         </View>
 
         {/* TARJETA 1: ESTADO DEL ALMACENAMIENTO OFFLINE */}
@@ -106,7 +99,7 @@ export default function MochilaScreen() {
                 <Text style={styles.zonaNombre}>{z.nombre}</Text>
                 <Text style={styles.zonaDesc}>{z.desc}</Text>
                 <Text style={styles.zonaTam}>
-                  💾 {z.tam} • {z.paquetes} circuitos con GPS
+                   {z.tam} • {z.paquetes} circuitos con GPS
                 </Text>
               </View>
               <Switch
@@ -121,7 +114,7 @@ export default function MochilaScreen() {
 
         {/* TARJETA 2: PASAPORTE SELVA GUÍA (GAMIFICACIÓN) */}
         <Text style={[styles.seccionTitulo, { marginTop: 22 }]}>
-          🎖️ Pasaporte Amazónico ({progresoRetos}/{RETOS_PASAPORTE.length} Retos)
+           Pasaporte Amazónico ({progresoRetos}/{RETOS_PASAPORTE.length} Retos)
         </Text>
         <Text style={styles.seccionNota}>
           Marca cada experiencia vivida para ganar tus sellos de explorador:
@@ -136,7 +129,7 @@ export default function MochilaScreen() {
                 onPress={() => alternarReto(reto.id)}
                 style={[styles.retoFila, idx > 0 && styles.retoBorde]}
               >
-                <Text style={styles.retoIcono}>{reto.icono}</Text>
+                <View style={styles.retoIcono}><Icon name={reto.icono} size={20} color={colors.primary} /></View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <Text style={[styles.retoTitulo, completado && styles.retoCompletado]}>
                     {reto.titulo}
@@ -144,8 +137,8 @@ export default function MochilaScreen() {
                   <Text style={styles.retoDesc}>{reto.desc}</Text>
                 </View>
                 <View style={[styles.checkCircle, completado && styles.checkCircleActivo]}>
-                  <Text style={{ color: completado ? BLANCO : '#94A3B8', fontWeight: '800', fontSize: 12 }}>
-                    {completado ? '✓' : '○'}
+                  <Text style={{ color: completado ? BLANCO : colors.textSubtle, fontWeight: '700', fontSize: 12 }}>
+                    {completado ? '' : '○'}
                   </Text>
                 </View>
               </Pressable>
@@ -155,7 +148,7 @@ export default function MochilaScreen() {
 
         {/* TIP DE CONEXIÓN */}
         <View style={styles.tipBox}>
-          <Text style={styles.tipTitulo}>📡 Modo Avión Activado:</Text>
+          <Text style={styles.tipTitulo}>Modo Avión Activado:</Text>
           <Text style={styles.tipTexto}>
             Los mapas descargados y los audios funcionarán incluso si navegas en medio del río
             Amazonas sin ningún chip o señal telefónica.
@@ -175,10 +168,9 @@ export default function MochilaScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: VERDE,
-    paddingTop: 52,
-    paddingBottom: 16,
+    backgroundColor: colors.bg,
     paddingHorizontal: 16,
+    paddingBottom: 8,
   },
   btnMenu: {
     padding: 8,
@@ -188,11 +180,11 @@ const styles = StyleSheet.create({
   btnMenuTexto: {
     fontSize: 20,
     color: BLANCO,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   headerTitulo: {
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '700',
     color: BLANCO,
   },
   headerSub: {
@@ -236,7 +228,7 @@ const styles = StyleSheet.create({
   },
   barraFondo: {
     height: 6,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: colors.border,
     borderRadius: 3,
     marginTop: 12,
   },
@@ -247,7 +239,7 @@ const styles = StyleSheet.create({
   },
   seccionTitulo: {
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '700',
     color: TINTA,
     marginHorizontal: 16,
     marginTop: 18,
@@ -293,10 +285,15 @@ const styles = StyleSheet.create({
   },
   retoBorde: {
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: colors.surfaceMuted,
   },
   retoIcono: {
-    fontSize: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   retoTitulo: {
     fontSize: 13,
@@ -305,7 +302,7 @@ const styles = StyleSheet.create({
   },
   retoCompletado: {
     textDecorationLine: 'line-through',
-    color: '#94A3B8',
+    color: colors.textSubtle,
   },
   retoDesc: {
     fontSize: 11,
@@ -326,7 +323,7 @@ const styles = StyleSheet.create({
     borderColor: VERDE,
   },
   tipBox: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: colors.primarySoft,
     marginHorizontal: 16,
     marginTop: 16,
     borderRadius: 12,
@@ -336,7 +333,7 @@ const styles = StyleSheet.create({
   },
   tipTitulo: {
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: '700',
     color: VERDE,
     marginBottom: 2,
   },

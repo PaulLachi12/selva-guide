@@ -12,15 +12,17 @@ import {
 } from 'react-native';
 import * as Speech from 'expo-speech';
 import { agregarResenaAPunto } from '../data/puntosData';
+import Icon from '../src/components/Icon';
+import { colors, space, radius, shadow } from '../src/theme';
 
-const VERDE_N = '#075E54';
-const VERDE_B = '#128C7E';
-const VERDE_A = '#25D366';
-const BLANCO = '#FFFFFF';
-const TINTA = '#1C1C1E';
-const GRIS = '#666666';
-const GRIS_CLARO = '#F0F2F5';
-const LINEA = '#E2E8F0';
+const VERDE_N = colors.primary;
+const VERDE_B = colors.primary;
+const VERDE_A = colors.primary;
+const BLANCO = colors.surface;
+const TINTA = colors.text;
+const GRIS = colors.textMuted;
+const GRIS_CLARO = colors.surfaceMuted;
+const LINEA = colors.border;
 
 export default function DetallePuntoModal({ visible, punto, onClose }) {
   const [hablando, setHablando] = useState(false);
@@ -102,7 +104,7 @@ export default function DetallePuntoModal({ visible, punto, onClose }) {
                 </Text>
               </View>
               <Pressable onPress={cerrarTodo} style={styles.btnCerrar}>
-                <Text style={styles.btnCerrarTexto}>✕</Text>
+                <Text style={styles.btnCerrarTexto}>×</Text>
               </Pressable>
             </View>
 
@@ -110,7 +112,7 @@ export default function DetallePuntoModal({ visible, punto, onClose }) {
 
             {/* Calificación y Dificultad */}
             <View style={styles.metaRow}>
-              <Text style={styles.starText}>★ {punto.rating || 4.8}</Text>
+              <Text style={styles.starText}>{punto.rating || 4.8}</Text>
               <Text style={styles.metaDivider}>•</Text>
               <Text style={styles.metaItem}>Dificultad: {punto.dificultad || 'Moderada'}</Text>
               <Text style={styles.metaDivider}>•</Text>
@@ -120,7 +122,7 @@ export default function DetallePuntoModal({ visible, punto, onClose }) {
             {/* Tarjeta de Audio-Guía */}
             <View style={styles.audioCard}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.audioTitulo}>🎙️ Audio-Guía Táctica</Text>
+                <Text style={styles.audioTitulo}>Audio-guía</Text>
                 <Text style={styles.audioSub}>Narración guiada en voz alta con acento loretano</Text>
               </View>
               <Pressable
@@ -128,14 +130,14 @@ export default function DetallePuntoModal({ visible, punto, onClose }) {
                 style={[styles.btnAudio, hablando && styles.btnAudioActivo]}
               >
                 <Text style={styles.btnAudioTexto}>
-                  {hablando ? '⏸️ Detener' : '▶️ Escuchar'}
+                  {hablando ? '⏸ Detener' : '▶ Escuchar'}
                 </Text>
               </Pressable>
             </View>
 
             {/* Cómo llegar y Ubicación */}
             <View style={styles.seccion}>
-              <Text style={styles.seccionTitulo}>📍 Cómo llegar & Acceso</Text>
+              <Text style={styles.seccionTitulo}>Cómo llegar & Acceso</Text>
               <Text style={styles.seccionTexto}>
                 <Text style={{ fontWeight: '700' }}>Ruta: </Text>
                 {punto.acceso || 'Mototaxi o peke-peke'}
@@ -148,7 +150,7 @@ export default function DetallePuntoModal({ visible, punto, onClose }) {
 
             {/* Descripción Detallada */}
             <View style={styles.seccion}>
-              <Text style={styles.seccionTitulo}>📖 Historia y Descripción</Text>
+              <Text style={styles.seccionTitulo}>Historia y Descripción</Text>
               <Text style={styles.descripcionTexto}>
                 {punto.descripcionLarga || punto.descripcionCorta}
               </Text>
@@ -157,7 +159,7 @@ export default function DetallePuntoModal({ visible, punto, onClose }) {
             {/* Recomendaciones de Campo */}
             {punto.recomendaciones && (
               <View style={[styles.seccion, styles.boxRecomendacion]}>
-                <Text style={styles.recomTitulo}>💡 Recomendaciones de Campo:</Text>
+                <Text style={styles.recomTitulo}>Recomendaciones</Text>
                 <Text style={styles.recomTexto}>{punto.recomendaciones}</Text>
               </View>
             )}
@@ -165,7 +167,7 @@ export default function DetallePuntoModal({ visible, punto, onClose }) {
             {/* Botón WhatsApp de Acción Directa */}
             <Pressable onPress={contactarWhatsApp} style={styles.btnWhatsApp}>
               <Text style={styles.btnWhatsAppTexto}>
-                💬 Reservar o Consultar por WhatsApp
+                Consultar por WhatsApp
               </Text>
             </Pressable>
 
@@ -188,7 +190,7 @@ export default function DetallePuntoModal({ visible, punto, onClose }) {
                   <View key={r.id} style={styles.resenaCard}>
                     <View style={styles.resenaTop}>
                       <Text style={styles.resenaAutor}>{r.autor}</Text>
-                      <Text style={styles.resenaEstrellas}>{'★'.repeat(r.rating || 5)}</Text>
+                      <Text style={styles.resenaEstrellas}>{''.repeat(r.rating || 5)}</Text>
                     </View>
                     <Text style={styles.resenaComentario}>{r.comentario}</Text>
                     <Text style={styles.resenaFecha}>{r.fecha || 'Reciente'}</Text>
@@ -221,7 +223,7 @@ export default function DetallePuntoModal({ visible, punto, onClose }) {
             <View style={styles.starsSelector}>
               {[1, 2, 3, 4, 5].map((s) => (
                 <Pressable key={s} onPress={() => setEstrellas(s)}>
-                  <Text style={[styles.starBtn, estrellas >= s && styles.starBtnActive]}>★</Text>
+                  <Text style={[styles.starBtn, estrellas >= s && styles.starBtnActive]}></Text>
                 </Pressable>
               ))}
             </View>
@@ -313,7 +315,7 @@ const styles = StyleSheet.create({
   },
   titulo: {
     fontSize: 22,
-    fontWeight: '800',
+    fontWeight: '700',
     color: TINTA,
     marginTop: 8,
   },
@@ -326,11 +328,11 @@ const styles = StyleSheet.create({
   starText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#D97706',
+    color: colors.star,
   },
   metaDivider: {
     marginHorizontal: 8,
-    color: '#94A3B8',
+    color: colors.textSubtle,
   },
   metaItem: {
     fontSize: 13,
@@ -452,12 +454,12 @@ const styles = StyleSheet.create({
     marginVertical: 6,
   },
   resenaCard: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.bg,
     borderRadius: 10,
     padding: 10,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
   },
   resenaTop: {
     flexDirection: 'row',
@@ -481,7 +483,7 @@ const styles = StyleSheet.create({
   },
   resenaFecha: {
     fontSize: 11,
-    color: '#94A3B8',
+    color: colors.textSubtle,
     marginTop: 4,
   },
 
@@ -502,7 +504,7 @@ const styles = StyleSheet.create({
   },
   modalTitulo: {
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '700',
     color: VERDE_N,
   },
   modalSub: {
@@ -540,7 +542,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   starBtnActive: {
-    color: '#F59E0B',
+    color: colors.star,
   },
   modalActions: {
     flexDirection: 'row',
