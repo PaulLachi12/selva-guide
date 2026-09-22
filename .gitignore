@@ -1,0 +1,23 @@
+# Dependencias y builds
+node_modules/
+dist/
+build/
+.expo/
+web-build/
+
+# Secretos
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# Subidas y sistema
+uploads/
+.DS_Store
+Thumbs.db
+
+# Scripts antiguos de reparación (archivados, no se suben)
+_archivo/

@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "SelvaGuide",
+    "slug": "selva-guide",
+    "scheme": "selvaguide",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.selvaguidemobile"
+    },
+    "android": {
+      "package": "com.selvaguidemobile"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": ["expo-sqlite", ["expo-location", {"locationWhenInUsePermission": "SelvaGuide usa tu ubicación para trazar rutas hacia los lugares."}]],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

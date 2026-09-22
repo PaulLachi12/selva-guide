@@ -1,0 +1,245 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
+    color: #222222;
+    background: #F7F5F0;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Fraunces', 'EB Garamond', Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  button { cursor: pointer; }
+
+  a, button, input, select, label {
+    transition-duration: 0.3s;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  }
+
+  ::selection { background: rgba(44, 62, 53, 0.16); }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #CFCBBF; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #ACA79A; }
+
+  .leaflet-container { width: 100%; height: 100%; z-index: 0; }
+  .leaflet-container a { color: #222222; text-decoration: none; }
+
+  /* ==== Mapa "tierra": tiles sepia + pines editoriales ==== */
+  .leaflet-container.mapa-sepia { background: #EFECE6; }
+  .mapa-sepia .leaflet-tile-pane { filter: sepia(0.14) saturate(1.18) contrast(0.97) brightness(1.02) hue-rotate(-4deg); }
+  .mapa-sepia .leaflet-control-attribution { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.05em; background: rgba(246, 244, 239, 0.55); color: #B5B0A4; padding: 2px 5px; border-radius: 3px; opacity: 0.7; }
+  .mapa-sepia .leaflet-control-attribution a { color: #B5B0A4; }
+  .mapa-sepia .leaflet-control-zoom { border: 1px solid #E3DFD5; box-shadow: none; }
+  .mapa-sepia .leaflet-control-zoom a { color: #2C3E35; background: #F6F4EF; }
+  .mapa-sepia .leaflet-control-zoom a:hover { background: #EEEBE3; }
+
+  .pin-mundi { position: relative; width: 30px; height: 30px; }
+  .pin-circulo {
+    position: absolute; inset: 0; margin: auto;
+    width: 26px; height: 26px; border-radius: 9999px;
+    background: #2C3E35; color: #F6F4EF;
+    border: 2px solid #F6F4EF;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+    box-shadow: 0 2px 6px rgba(44, 62, 53, 0.35);
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), background 0.25s, border-color 0.25s;
+  }
+  .pin-circulo.activo { background: #8A4A3B; transform: scale(1.16); border-color: #F0EDE4; }
+  .pin-pulso {
+    position: absolute; inset: 0; margin: auto的一项; border-radius: 9999px;
+    border: 2px solid #8A4A3B; opacity: 0;
+  }
+  .pin-pulso.on { animation: pin-pulso 1.2s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+  @keyframes pin-pulso {
+    0% { transform: scale(短发); opacity: 0.55; }
+    70% { transform: scale(1.95); opacity: 0; }
+    100% { transform: scale(1.95); opacity: 0; }
+  }
+
+  .mapa-sepia .leaflet-popup-content-wrapper {
+    background: #F6F4EF; color: #222222; border: 1px solid #E3DFD5;
+    border-radius: 0; box-shadow: 0 12px 28px rgba(34, 34, 34, 0.12);
+    font-family: 'Plus Jakarta Sans', sans-serif; padding: 0;
+  }
+  .mapa-sepia .leaflet-popup-tip { background: #F6F4EF; border: 1px solid #E3DFD5; }
+  .mapa-sepia .leaflet-popup-content { margin: 0; line-height: 1.5; }
+  .mapa-sepia .leaflet-popup-close-button { color: #9B968B; }
+
+  /* Tooltip de pines — nombre + precio (datos monoespaciados) */
+  .mapa-sepia .leaflet-tooltip {
+    background: #F6F4EF; color: #222222;
+    border: 1px solid #E3DFD5; border-radius: 2px;
+    box-shadow: 0 10px 24px rgba(34, 34, 34, 0.10);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    padding: 0.5rem 0.65rem;
+  }
+  .mapa-sepia .leaflet-tooltip-top:before { border-top-color: #E3DFD5; }
+  .tooltip-inicial {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 9999px;
+    background: #2C3E35; color: #F6F4EF;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+    vertical-align: -7px;
+  }
+  .tooltip-precio {
+    display: block; margin-top: 0.5rem;
+    color: #8A4A3B; font-weight: 700; font-size: 12px;
+  }
+
+  /* Vigneta sobria de borde sobre el mapa */
+  .vigneta {
+    background: radial-gradient(130% 110% at 50% 42%, transparent 66%, rgba(44, 62, 53, 0.10) 100%);
+  }
+}
+
+/* ==== Etiquetas de catálogo (ficha técnica, monoespaciadas) ==== */
+.stamp {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+
+/* ==== Meta separada por puntos (cédula de datos) ==== */
+.meta-dots {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 13px;
+  color: #66635B;
+}
+.meta-dots > span + span::before {
+  content: '•';
+  margin-right: 0.4rem;
+  color: #CFCBBF;
+}
+
+/* ==== Aparición progresiva (fade-in + slide-up de 10px) ==== */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.toast-enter { animation: toast-in 0.25s ease-out both; }
+
+@keyframes toast-timer {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+.toast-timer { animation: toast-timer 4s linear forwards; }
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fade-in-up 0.3s ease-out both; }
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #F1EDE5 25%, #EAE6DF 50%, #F1EDE5 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+/* ==== Utilidades de interacción ==== */
+@layer utilities {
+  .btn-press {
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .btn-press:active { transform: scale(0.985); }
+
+  .card-lift {
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .card-lift:hover { background-color: #EAE6DF; }
+
+  .link-underline { position: relative; }
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    height: 1px;
+    width: 0;
+    background: currentColor;
+    transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .link-underline:hover::after { width: 100%; }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+}
+
+/* ==== Input de fecha estilizado (full-click abre el picker) ==== */
+.input-fecha {
+  color-scheme: light;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+.input-fecha::-webkit-calendar-picker-indicator {
+  position: absolute; inset: 0; width: auto; height: auto;
+  background: transparent; opacity: 0; cursor: pointer;
+}
+
+/* ==== Chips de categoría — activo carbón/crema, transición suave ==== */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid #E3DFD5;
+  border-radius: 9999px;
+  padding: 0.45rem 1rem;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #66635B;
+  background: transparent;
+  transition: all 0.25s ease;
+}
+.chip:hover { border-color: #3A4D3F; color: #3A4D3F; transform: translateY(-1px); }
+.chip-activo, .chip-activo:hover {
+  background: #222222; border-color: #222222; color: #F7F5F0;
+  transform: none;
+}
+.chip-count { font-size: 10px; opacity: 0.55; }
+.chip-limpiar { color: #8A4A3B; border-color: rgba(138, 74, 59, 0.35); }
+.chip-limpiar:hover { border-color: #8A4A3B; color: #8A4A3B; }
+
+/* ==== Patrón soberbio para imágenes placeholder ==== */
+.patron-selva {
+  background-color: #EAE3D4;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(58, 77, 63, 0.05) 0 2px, transparent 2px 14px),
+    repeating-linear-gradient(-45deg, rgba(58, 77, 63, 0.04) 0 2px, transparent 2px 20px),
+    radial-gradient(circle at 30% 28%, rgba(138, 74, 59, 0.07) 0 30%, transparent 36%);
+}
