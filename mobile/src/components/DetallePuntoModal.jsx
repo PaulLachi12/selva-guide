@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import * as Speech from 'expo-speech';
 import { agregarResenaAPunto } from '../data/puntosData';
-import Icon from '../src/components/Icon';
-import { colors, space, radius, shadow } from '../src/theme';
+import Icon from './Icon';
+import { colors, space, radius, shadow } from '../theme';
 
 const VERDE_N = colors.primary;
 const VERDE_B = colors.primary;
