@@ -4,6 +4,8 @@ SelvaGuide es una guía turística móvil para Iquitos (Loreto, Perú). Acompañ
 
 Este directorio reúne la visión, el plan de trabajo y las decisiones técnicas del proyecto. El trabajo pendiente está en los **issues** de GitHub; cada issue enlaza al documento que lo explica.
 
+**¿Poco tiempo?** Lee el [resumen ejecutivo](./RESUMEN.md) (2 minutos).
+
 ## Índice
 
 | Doc | Título | Para quién |
@@ -14,6 +16,7 @@ Este directorio reúne la visión, el plan de trabajo y las decisiones técnicas
 | D | [Login profesional y backend](./D-login-y-backend.md) | Backend y mobile |
 | E | [Permisos y privacidad](./E-permisos-y-privacidad.md) | Todo el equipo |
 | — | [Estado actual y brechas](./estado-y-brechas.md) | Todo el equipo |
+| ADR | [Decisiones de arquitectura](./adr/README.md) | Todo el equipo |
 
 Para empezar a contribuir, lee [`CONTRIBUTING.md`](../CONTRIBUTING.md).
 

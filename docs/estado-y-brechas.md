@@ -2,6 +2,17 @@
 
 Última revisión: septiembre de 2026.
 
+## Puertas de calidad
+
+| Puerta | Comando | Resultado |
+| --- | --- | --- |
+| Traducciones completas (es, en, fr, pt) | `npm run check:i18n` en `mobile/` | Pasa: 410 claves, 29 archivos |
+| Bundle de Android | `npm run check:bundle` en `mobile/` | Pasa |
+| Sintaxis del backend | `node --check` en el CI | En el CI |
+| Build del panel web | `npm run build` en `client/` | En el CI |
+| Tests automáticos | — | No existen todavía (épica Login) |
+| Prueba en dispositivo real | — | Pendiente (épica Fase 0) |
+
 ## Hecho en la app móvil
 
 | Funcionalidad | Notas |

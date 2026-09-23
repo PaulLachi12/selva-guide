@@ -8,8 +8,8 @@
 
 ## 2. Ramas
 
-- Parte siempre de la rama principal actualizada.
-- Nombre de rama: `tipo/descripcion-corta`, por ejemplo `feat/login-pantallas` o `fix/tarjeta-rutas`.
+- Parte de `main` y nombra la rama `feature/<area>-<descripcion-corta>`, por ejemplo `feature/auth-refresh-token` o `fix/mobile-tarjeta-rutas`.
+- Nunca hagas commit directo a `main`.
 
 ## 3. Commits
 
@@ -30,6 +30,8 @@ Tipos: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `style`.
 - Explica qué cambia y cómo lo probaste.
 - En mobile, adjunta capturas en modo claro y oscuro.
 - Pide revisión a un compañero antes de hacer merge.
+- No hagas merge con conflictos ni con el CI en rojo.
+- Antes de abrir el PR, en `mobile/` corre `npm run check:i18n`.
 
 ## 5. Reglas de la app móvil
 
