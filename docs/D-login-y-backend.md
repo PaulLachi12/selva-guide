@@ -59,6 +59,12 @@ Diseño con la línea de la app: verde selva en modo claro, estilo WhatsApp en o
 - Sin conexión, la app sigue como invitado y la guía funciona igual.
 - Se elimina "Activar modo admin (demo)"; el rol admin viene del backend.
 
+### Panel web
+- El panel web (`client/`) también usa el login. Debe adaptarse al refresh token y al logout en la misma etapa, o dejará de mantener la sesión.
+
+### Más adelante
+- Login real con Google y Apple cuando existan credenciales (`POST /auth/social`).
+
 ## D.5 Etapa 4 — Puntos y reseñas en el backend (3–4 días)
 
 - Modelo y migración `puntos` con los campos de `puntosData.js` y traducciones en una columna JSON.
