@@ -370,10 +370,186 @@ export const PUNTOS_INICIALES = [
     resenas: [
       { id: 112, autor: 'Patricia V.', rating: 5, comentario: 'El juane original de gallina de chacra con su ají de cocona no tiene comparación.', fecha: 'Ayer' }
     ]
+  },
+  {
+    id: 501,
+    nombre: 'Alquiler de Motos Leo',
+    categoria: 'transporte',
+    subcategoria: 'Alquiler de Vehículos',
+    calle: 'Calle Morona esq. Tacna',
+    direccion: 'Calle Morona esquina con Tacna, Centro de Iquitos',
+    lat: -3.7488,
+    lng: -73.2465,
+    distancia: '0.3 km de Plaza de Armas',
+    acceso: 'A pie desde el centro',
+    costo: 'S/ 35.00 - S/ 50.00 por día',
+    dificultad: 'Fácil',
+    horario: 'Todos los días 7:00 AM - 8:00 PM',
+    telefono: '+51965842100',
+    descripcionCorta: 'Renta tu propia moto para moverte libremente por Iquitos y salir hasta la carretera Iquitos-Nauta.',
+    descripcionLarga: 'Alquiler de Motos Leo ofrece motos en buen estado por día completo, ideales para explorar el centro de Iquitos a tu ritmo o aventurarte por la carretera Iquitos-Nauta. Incluye casco y una breve inducción de manejo.',
+    recomendaciones: 'Llevar brevete o licencia de conducir y una copia de tu documento de identidad para el depósito de garantía.',
+    audio: 'Alquiler de Motos Leo, en la calle Morona con Tacna, te da la libertad de recorrer Iquitos y sus alrededores manejando tu propia moto.',
+    rating: 4.7,
+    resenas: [
+      { id: 501, autor: 'Renzo A.', rating: 5, comentario: 'Motos en buen estado y precio justo por día.', fecha: 'Hace 3 días' }
+    ]
+  },
+  {
+    id: 502,
+    nombre: 'Casa de Fierro',
+    categoria: 'turistico',
+    subcategoria: 'Patrimonio / Arquitectura',
+    calle: 'Jr. Próspero con Jr. Putumayo',
+    direccion: 'Plaza de Armas de Iquitos',
+    lat: -3.7494,
+    lng: -73.2437,
+    distancia: '0 km (Centro)',
+    acceso: 'A pie en el centro de la ciudad',
+    costo: 'Acceso a fachada libre',
+    dificultad: 'Muy fácil',
+    horario: '24 horas (fachada)',
+    telefono: '+51965842100',
+    descripcionCorta: 'Edificio de planchas de hierro atribuido a Gustave Eiffel, símbolo de la época del caucho.',
+    descripcionLarga: 'Construida con planchas de hierro traídas de Europa durante el auge del caucho, la Casa de Fierro es uno de los símbolos arquitectónicos más reconocidos de Iquitos y de la Amazonía peruana.',
+    recomendaciones: 'Visitar de día para fotografiar los detalles de las planchas metálicas y combinarlo con un paseo por la Plaza de Armas.',
+    audio: 'La Casa de Fierro es un testimonio de hierro del esplendor cauchero que convirtió a Iquitos en una ciudad cosmopolita en plena selva.',
+    rating: 4.6,
+    resenas: []
+  },
+  {
+    id: 503,
+    nombre: 'Museo de Culturas Indígenas Amazónicas',
+    categoria: 'turistico',
+    subcategoria: 'Cultural / Museo',
+    calle: 'Jr. Málaga',
+    direccion: 'Malecón Tarapacá, Centro de Iquitos',
+    lat: -3.7479,
+    lng: -73.2429,
+    distancia: '0.1 km del Malecón Tarapacá',
+    acceso: 'A pie desde el Malecón Tarapacá',
+    costo: 'Entrada S/ 15.00 aprox.',
+    dificultad: 'Muy fácil',
+    horario: 'Lunes a sábado, 9:00 AM - 6:00 PM',
+    telefono: '+51965842100',
+    descripcionCorta: 'Colección de artesanía, vestimenta y objetos rituales de los pueblos indígenas de la Amazonía peruana.',
+    descripcionLarga: 'Museo que reúne piezas originales de diversos pueblos amazónicos (Bora, Huitoto, Shipibo, entre otros), con explicaciones sobre su cosmovisión, vestimenta ceremonial y objetos de uso cotidiano.',
+    recomendaciones: 'Reservar una hora para el recorrido y aprovechar la tienda de artesanías a la salida.',
+    audio: 'El Museo de Culturas Indígenas Amazónicas acerca al visitante a la cosmovisión de los pueblos originarios de Loreto.',
+    rating: 4.5,
+    resenas: []
+  },
+  {
+    id: 504,
+    nombre: 'Casa Morey',
+    categoria: 'turistico',
+    subcategoria: 'Patrimonio / Arquitectura',
+    calle: 'Malecón Tarapacá',
+    direccion: 'Malecón Tarapacá, Centro de Iquitos',
+    lat: -3.7472,
+    lng: -73.2422,
+    distancia: '0.2 km del Malecón Tarapacá',
+    acceso: 'A pie desde el Malecón Tarapacá',
+    costo: 'Acceso a fachada libre / hotel boutique',
+    dificultad: 'Muy fácil',
+    horario: '24 horas (fachada)',
+    telefono: '+51965842100',
+    descripcionCorta: 'Antigua mansión cauchera con fachada de azulejos portugueses, hoy convertida en hotel boutique.',
+    descripcionLarga: 'Una de las mansiones más elegantes de la época del caucho, con azulejos traídos de Portugal e Italia. Hoy funciona como hotel boutique y conserva gran parte de su arquitectura original.',
+    recomendaciones: 'Ideal para fotografiar la fachada al atardecer, junto con las demás casonas del Malecón Tarapacá.',
+    audio: 'Casa Morey conserva en sus azulejos el lujo que trajo el caucho a orillas del río Amazonas.',
+    rating: 4.6,
+    resenas: []
+  },
+  {
+    id: 505,
+    nombre: 'Isla de los Monos',
+    categoria: 'turistico',
+    subcategoria: 'Naturaleza / Fauna',
+    calle: 'Río Amazonas (acceso fluvial)',
+    direccion: 'Isla de los Monos, Río Amazonas',
+    lat: -3.8283,
+    lng: -73.3706,
+    distancia: '~30 km de Iquitos (vía fluvial)',
+    acceso: 'Bote desde el embarcadero (aprox. 45 min - 1 h)',
+    costo: 'Tour desde S/ 60.00 por persona',
+    dificultad: 'Fácil',
+    horario: 'Tours diurnos, 8:00 AM - 4:00 PM',
+    telefono: '+51965842100',
+    descripcionCorta: 'Santuario donde monos rescatados viven en semi-libertad rodeados de bosque inundable.',
+    descripcionLarga: 'Refugio en una isla del Amazonas donde conviven distintas especies de monos rescatados del tráfico de fauna, en un entorno de bosque inundable. Los visitantes pueden observarlos e interactuar de cerca bajo supervisión.',
+    recomendaciones: 'Llevar bloqueador solar, repelente y no dar de comer a los monos sin autorización del guía.',
+    audio: 'La Isla de los Monos es un refugio de segunda oportunidad para primates rescatados en plena Amazonía.',
+    rating: 4.7,
+    resenas: []
+  },
+  {
+    id: 506,
+    nombre: 'Pilpintuwasi (Mariposario de Padre Cocha)',
+    categoria: 'turistico',
+    subcategoria: 'Naturaleza / Fauna',
+    calle: 'Padre Cocha (acceso fluvial)',
+    direccion: 'Padre Cocha, frente a Bellavista Nanay',
+    lat: -3.7267,
+    lng: -73.2775,
+    distancia: '~15 min en bote desde Bellavista Nanay',
+    acceso: 'Bote desde el Embarcadero Bellavista Nanay',
+    costo: 'Entrada S/ 20.00 aprox.',
+    dificultad: 'Fácil',
+    horario: 'Todos los días 9:00 AM - 4:30 PM',
+    telefono: '+51965842100',
+    descripcionCorta: 'Criadero de mariposas amazónicas que también alberga animales rescatados como el jaguar Pancho.',
+    descripcionLarga: 'Pilpintuwasi (\'Casa de las mariposas\' en quechua) cría decenas de especies de mariposas amazónicas y alberga además otros animales rescatados: jaguares, tapires, monos y aves, en un recorrido guiado por senderos de selva.',
+    recomendaciones: 'Combinar la visita con Bellavista Nanay y llevar cámara: las mariposas son más activas en horas de sol.',
+    audio: 'Pilpintuwasi es un santuario donde la Amazonía protege a sus mariposas y a la fauna que el tráfico ilegal dejó sin hogar.',
+    rating: 4.8,
+    resenas: []
   }
 ];
 
 let puntosLocales = [...PUNTOS_INICIALES];
+
+// Tipo de cambio referencial solo para orientar al turista (no es tasa oficial de cambio).
+const TIPO_CAMBIO_REF = 3.75;
+
+// true entre 10:00 PM y 5:00 AM (recargo nocturno de mototaxi)
+export function esHorarioNocturno(fecha = new Date()) {
+  const h = fecha.getHours();
+  return h >= 22 || h < 5;
+}
+
+// Tarifas EXCLUSIVAS de Mototaxi (único transporte soportado por la app), según distancia (metros).
+// Incluye conversión referencial a USD y recargo nocturno (10 PM - 5 AM).
+export function tarifaMototaxi(distanciaMetros, fecha = new Date()) {
+  const km = distanciaMetros / 1000;
+  let min, max, tramo;
+  if (km < 3) { min = 3; max = 4; tramo = 'Corto (< 3 km)'; }
+  else if (km <= 6) { min = 5; max = 7; tramo = 'Medio (3 - 6 km)'; }
+  else { min = 8; max = 12; tramo = 'Largo (> 6 km)'; }
+
+  const nocturno = esHorarioNocturno(fecha);
+  const recargo = nocturno ? 1 : 0; // +S/ 1.00 - S/ 2.00, se muestra el mínimo del rango
+  const recargoMax = nocturno ? 2 : 0;
+  const minFinal = min + recargo;
+  const maxFinal = max + recargoMax;
+
+  const etiquetaBase = km > 12
+    ? `S/ ${minFinal}.00 - S/ ${maxFinal + Math.round(km - 12)}.00+`
+    : `S/ ${minFinal}.00 - S/ ${maxFinal}.00${km > 6 ? '+' : ''}`;
+
+  const usdMin = (minFinal / TIPO_CAMBIO_REF).toFixed(2);
+  const usdMax = (maxFinal / TIPO_CAMBIO_REF).toFixed(2);
+
+  return {
+    min: minFinal,
+    max: maxFinal,
+    tramo,
+    nocturno,
+    etiqueta: etiquetaBase,
+    etiquetaUsd: `~$${usdMin} - $${usdMax} USD`,
+    etiquetaCompleta: `${etiquetaBase} (${'~$'}${usdMin} - $${usdMax} USD)${nocturno ? ' · incluye recargo nocturno' : ''}`,
+  };
+}
 
 export function obtenerPuntos() {
   return puntosLocales;
@@ -383,6 +559,15 @@ export function agregarPunto(nuevoPunto) {
   puntosLocales = [nuevoPunto, ...puntosLocales];
   listeners.forEach(fn => fn(puntosLocales));
   return puntosLocales;
+}
+
+// Edición rápida de admin: descripción, ubicación del marcador o tarifa base (S/ mínimo de mototaxi).
+// Hoy muta el array en memoria (mismo patrón que agregarResenaAPunto); cuando exista backend real
+// basta con reemplazar el cuerpo de esta función por una llamada a la API (ver services/api.js).
+export function actualizarPunto(puntoId, cambios) {
+  puntosLocales = puntosLocales.map((p) => (p.id === puntoId ? { ...p, ...cambios } : p));
+  listeners.forEach((fn) => fn(puntosLocales));
+  return puntosLocales.find((p) => p.id === puntoId);
 }
 
 export function agregarResenaAPunto(puntoId, resena) {

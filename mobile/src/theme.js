@@ -29,6 +29,7 @@ export const categoryColors = {
   gastronomico: '#B8612F',
   deportivo: '#9A3D3D',
   recreativo: '#2F5E88',
+  transporte: '#6B4A9E',
 };
 
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 };

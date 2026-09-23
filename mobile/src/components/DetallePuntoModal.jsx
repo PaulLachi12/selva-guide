@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,17 @@ import {
   StyleSheet,
   Linking,
   TextInput,
-  Alert
+  Alert,
+  Animated,
+  PanResponder,
+  Dimensions
 } from 'react-native';
 import * as Speech from 'expo-speech';
-import { agregarResenaAPunto } from '../data/puntosData';
+import * as Haptics from 'expo-haptics';
+import GlassView from './GlassView';
+import AdminEditModal from './AdminEditModal';
+import { agregarResenaAPunto, tarifaMototaxi, esHorarioNocturno } from '../data/puntosData';
+import { useAuth } from '../context/AuthContext';
 import Icon from './Icon';
 import { colors, space, radius, shadow } from '../theme';
 
@@ -24,14 +31,95 @@ const GRIS = colors.textMuted;
 const GRIS_CLARO = colors.surfaceMuted;
 const LINEA = colors.border;
 
-export default function DetallePuntoModal({ visible, punto, onClose }) {
+function formatearDuracionModal(seg) {
+  const min = Math.round(seg / 60);
+  if (min < 60) return `${min} min`;
+  return `${Math.floor(min / 60)} h ${min % 60} min`;
+}
+
+function formatearDistanciaModal(m) {
+  return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
+}
+
+const ALTO_PANTALLA = Dimensions.get('window').height;
+
+// Sheet de 3 estados (detents estilo iOS): 90% / 50% / 15% de la pantalla visible.
+const SHEET_ALTO = ALTO_PANTALLA * 0.92;
+const SNAP_FULL = Math.max(0, SHEET_ALTO - ALTO_PANTALLA * 0.90);
+const SNAP_MEDIO = Math.max(0, SHEET_ALTO - ALTO_PANTALLA * 0.50);
+const SNAP_MINI = Math.max(0, SHEET_ALTO - ALTO_PANTALLA * 0.15);
+const SNAP_CERRADO = SHEET_ALTO;
+
+export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, onComoLlegar, onClose }) {
   const [hablando, setHablando] = useState(false);
   const [modalResena, setModalResena] = useState(false);
   const [nombreAutor, setNombreAutor] = useState('');
   const [comentario, setComentario] = useState('');
   const [estrellas, setEstrellas] = useState(5);
+  const [ticketVisible, setTicketVisible] = useState(false);
+  const [adminEditVisible, setAdminEditVisible] = useState(false);
+  const { esAdmin } = useAuth();
+
+  // Animación de deslizamiento con 3 posiciones (Minimizado / Medio / Desplegado)
+  const translateY = useRef(new Animated.Value(SNAP_MEDIO)).current;
+
+  useEffect(() => {
+    if (visible) {
+      translateY.setValue(SNAP_CERRADO);
+      Animated.spring(translateY, { toValue: SNAP_MEDIO, useNativeDriver: true, bounciness: 2 }).start();
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    }
+  }, [visible, punto]);
+
+  // Definida aquí (no depende de `punto`) para que el PanResponder de abajo, que solo se crea
+  // una vez vía useRef, cierre siempre sobre una función ya inicializada.
+  const cerrarTodo = () => {
+    Speech.stop();
+    setHablando(false);
+    onClose?.();
+  };
+
+  const irASnap = (valor, cerrar = false) => {
+    Animated.spring(translateY, { toValue: valor, useNativeDriver: true, bounciness: cerrar ? 0 : 3 }).start(
+      ({ finished }) => {
+        if (finished && cerrar && typeof cerrarTodo === 'function') {
+          cerrarTodo();
+        }
+      }
+    );
+  };
+
+  const cerrarConSlide = () => irASnap(SNAP_CERRADO, true);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dy) > 6 && Math.abs(g.dy) > Math.abs(g.dx),
+      onPanResponderGrant: () => {
+        translateY.stopAnimation();
+        translateY.extractOffset();
+      },
+      onPanResponderMove: Animated.event([null, { dy: translateY }], { useNativeDriver: false }),
+      onPanResponderRelease: (_e, g) => {
+        translateY.flattenOffset();
+        const actual = translateY.__getValue ? translateY.__getValue() : 0;
+        if (g.dy > 140 || g.vy > 0.9) {
+          irASnap(SNAP_CERRADO, true);
+          return;
+        }
+        // Snap al punto más cercano entre FULL / MEDIO / MINI
+        const candidatos = [SNAP_FULL, SNAP_MEDIO, SNAP_MINI];
+        const destino = candidatos.reduce((mejor, c) =>
+          Math.abs(c - actual) < Math.abs(mejor - actual) ? c : mejor
+        );
+        irASnap(destino);
+      },
+    })
+  ).current;
 
   if (!punto) return null;
+
+  const tarifaActual = ruta ? tarifaMototaxi(ruta.distancia) : null;
 
   const alternarAudio = () => {
     if (hablando) {
@@ -51,10 +139,11 @@ export default function DetallePuntoModal({ visible, punto, onClose }) {
     }
   };
 
-  const cerrarTodo = () => {
-    Speech.stop();
-    setHablando(false);
-    onClose();
+
+  const llamarSOS = () => {
+    Linking.openURL('tel:+51065231152').catch(() => {
+      Alert.alert('Emergencia', 'Policía de Turismo de Iquitos (POLTUR): (065) 231152');
+    });
   };
 
   const contactarWhatsApp = () => {
@@ -87,53 +176,73 @@ export default function DetallePuntoModal({ visible, punto, onClose }) {
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={cerrarTodo}>
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={cerrarConSlide}>
       <View style={styles.overlay}>
-        <View style={styles.sheet}>
-          {/* Header Bar */}
-          <View style={styles.handleBarContainer}>
+        <GlassView tint="dark" style={StyleSheet.absoluteFill} pointerEvents="none" />
+        <Pressable style={StyleSheet.absoluteFill} onPress={cerrarConSlide} />
+        <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
+          {/* Header Bar (arrastrable: swipe down para cerrar, o snap a Mini/Medio/Full) */}
+          <GlassView tint="light" style={styles.handleBarContainer} {...panResponder.panHandlers}>
             <View style={styles.handleBar} />
-          </View>
+          </GlassView>
 
           <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
             {/* Header Información */}
             <View style={styles.headerInfo}>
               <View style={styles.badgeCategoria}>
                 <Text style={styles.badgeTexto}>
-                  {punto.subcategoria || punto.categoria.toUpperCase()}
+                  {punto.subcategoria || (punto.categoria ? punto.categoria.toUpperCase() : 'LUGAR')}
                 </Text>
               </View>
-              <Pressable onPress={cerrarTodo} style={styles.btnCerrar}>
-                <Text style={styles.btnCerrarTexto}>×</Text>
-              </Pressable>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                {esAdmin && (
+                  <Pressable onPress={() => setAdminEditVisible(true)} style={styles.fabAdmin}>
+                    <Text style={styles.fabAdminTexto}>✏️ Modo Admin</Text>
+                  </Pressable>
+                )}
+                <Pressable onPress={cerrarConSlide} style={styles.btnCerrar} hitSlop={10}>
+                  <Text style={styles.btnCerrarTexto}>×</Text>
+                </Pressable>
+              </View>
             </View>
 
             <Text style={styles.titulo}>{punto.nombre}</Text>
 
-            {/* Calificación y Dificultad */}
-            <View style={styles.metaRow}>
-              <Text style={styles.starText}>{punto.rating || 4.8}</Text>
-              <Text style={styles.metaDivider}>•</Text>
-              <Text style={styles.metaItem}>Dificultad: {punto.dificultad || 'Moderada'}</Text>
-              <Text style={styles.metaDivider}>•</Text>
-              <Text style={styles.metaItem}>{punto.costo || 'Consultar tarifa'}</Text>
+            {/* Quick Facts: la info clave de un vistazo, sin texto florido */}
+            <View style={styles.quickFactsRow}>
+              <View style={styles.quickFactChip}>
+                <Text style={styles.quickFactTexto}>
+                  {ruta ? `⏱️ ${formatearDuracionModal(ruta.duracion)}` : `⏱️ ${punto.distancia || 'Iquitos'}`}
+                </Text>
+              </View>
+              <View style={styles.quickFactChip}>
+                <Text style={styles.quickFactTexto}>
+                  {tarifaActual ? `💵 ${tarifaActual.etiqueta}` : `💵 ${punto.costo || 'Consultar'}`}
+                </Text>
+              </View>
+              <View style={styles.quickFactChip}>
+                <Text style={styles.quickFactTexto}>⭐ {punto.rating || 4.8}</Text>
+              </View>
             </View>
 
-            {/* Tarjeta de Audio-Guía */}
-            <View style={styles.audioCard}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.audioTitulo}>Audio-guía</Text>
-                <Text style={styles.audioSub}>Narración guiada en voz alta con acento loretano</Text>
+            {/* Tarjeta de Audio-Guía: solo sitios turísticos/históricos (Iglesia Matriz, Casa de Fierro,
+                Quistococha, Plaza de Armas...), nunca en gastronomía, cafés, terrazas u hoteles */}
+            {(punto.categoria === 'turistico' || punto.tieneAudioGuia === true) && (
+              <View style={styles.audioCard}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.audioTitulo}>Audio-guía</Text>
+                  <Text style={styles.audioSub}>Narración guiada en voz alta con acento loretano</Text>
+                </View>
+                <Pressable
+                  onPress={alternarAudio}
+                  style={[styles.btnAudio, hablando && styles.btnAudioActivo]}
+                >
+                  <Text style={styles.btnAudioTexto}>
+                    {hablando ? '⏸ Detener' : '▶ Escuchar'}
+                  </Text>
+                </Pressable>
               </View>
-              <Pressable
-                onPress={alternarAudio}
-                style={[styles.btnAudio, hablando && styles.btnAudioActivo]}
-              >
-                <Text style={styles.btnAudioTexto}>
-                  {hablando ? '⏸ Detener' : '▶ Escuchar'}
-                </Text>
-              </Pressable>
-            </View>
+            )}
 
             {/* Cómo llegar y Ubicación */}
             <View style={styles.seccion}>
@@ -148,9 +257,60 @@ export default function DetallePuntoModal({ visible, punto, onClose }) {
               </Text>
             </View>
 
-            {/* Descripción Detallada */}
+            {/* Botón "Cómo llegar": dispara cálculo de ruta y tarifa en mototaxi */}
+            <Pressable
+              onPress={() => onComoLlegar && onComoLlegar(punto)}
+              style={styles.btnComoLlegar}
+            >
+              <Text style={styles.btnComoLlegarTexto}>🛺 Cómo llegar - Ver ruta y tarifa</Text>
+            </Pressable>
+
+            <View style={styles.boxMototaxiSeguro}>
+              <Text style={styles.mototaxiSeguroTitulo}>Mototaxi Seguro</Text>
+              <Text style={styles.mototaxiSeguroTexto}>
+                Verifica que la moto tenga placa y calcomanía de empadronamiento visibles, y acuerda la tarifa antes de subir.
+              </Text>
+              <Pressable onPress={llamarSOS} style={styles.btnSOSModal}>
+                <Text style={styles.btnSOSModalTexto}>🆘 SOS / Policía de Turismo de Iquitos</Text>
+              </Pressable>
+            </View>
+
+            {cargandoRuta && !ruta && (
+              <View style={[styles.seccion, styles.boxEstimado]}>
+                <Text style={styles.estimadoTitulo}>Calculando ruta y tarifa en Mototaxi…</Text>
+              </View>
+            )}
+
+            {/* Estimado de viaje en mototaxi */}
+            {ruta && (
+              <View style={[styles.seccion, styles.boxEstimado]}>
+                <Text style={styles.estimadoTitulo}>Tarifa estimada en Mototaxi</Text>
+                <Text style={styles.estimadoDato}>
+                  {formatearDistanciaModal(ruta.distancia)} · {formatearDuracionModal(ruta.duracion)}
+                </Text>
+                <Text style={styles.estimadoTarifa}>
+                  Tarifa estimada en Mototaxi: {tarifaMototaxi(ruta.distancia).etiquetaCompleta}
+                </Text>
+                <Text style={styles.estimadoIndicacion}>
+                  Ruta recomendada: {punto.acceso || 'consultar con el mototaxista la vía más directa'}.
+                </Text>
+                <Text style={styles.zonaBadgeModal}>
+                  {esHorarioNocturno() ? '⚠️ Precaución de noche: prefiere mototaxis con placa visible.' : '✅ Zona Turística Sugerida'}
+                </Text>
+                <Pressable
+                  onPress={() => {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+                    setTicketVisible(true);
+                  }}
+                  style={styles.btnTicket}
+                >
+                  <Text style={styles.btnTicketTexto}>📱 Mostrar tarifa al chofer</Text>
+                </Pressable>
+              </View>
+            )}
+
+            {/* Descripción: texto directo, sin encabezado redundante */}
             <View style={styles.seccion}>
-              <Text style={styles.seccionTitulo}>Historia y Descripción</Text>
               <Text style={styles.descripcionTexto}>
                 {punto.descripcionLarga || punto.descripcionCorta}
               </Text>
@@ -201,7 +361,7 @@ export default function DetallePuntoModal({ visible, punto, onClose }) {
 
             <View style={{ height: 40 }} />
           </ScrollView>
-        </View>
+        </Animated.View>
       </View>
 
       {/* Modal Escribir Reseña */}
@@ -249,6 +409,28 @@ export default function DetallePuntoModal({ visible, punto, onClose }) {
           </View>
         </View>
       </Modal>
+
+      {/* Boleto digital: tarjeta gigante para mostrar al mototaxista, sin discusiones de tarifa */}
+      <Modal visible={ticketVisible} animationType="fade" transparent onRequestClose={() => setTicketVisible(false)}>
+        <Pressable style={styles.ticketOverlay} onPress={() => setTicketVisible(false)}>
+          <View style={styles.ticketCard}>
+            <Text style={styles.ticketRuta}>RUTA A {(punto.nombre || '').toUpperCase()}</Text>
+            <Text style={styles.ticketMonto}>
+              {tarifaActual ? `S/ ${tarifaActual.min}.00 - S/ ${tarifaActual.max}.00` : 'Consultar tarifa'}
+            </Text>
+            {tarifaActual && <Text style={styles.ticketUsd}>{tarifaActual.etiquetaUsd}</Text>}
+            {tarifaActual?.nocturno && <Text style={styles.ticketNocturno}>Incluye recargo nocturno</Text>}
+            <Text style={styles.ticketPie}>Tarifa referencial en Mototaxi · Selva Guía Iquitos</Text>
+            <Text style={styles.ticketCerrar}>Toca para cerrar</Text>
+          </View>
+        </Pressable>
+      </Modal>
+
+      <AdminEditModal
+        visible={adminEditVisible}
+        punto={punto}
+        onClose={() => setAdminEditVisible(false)}
+      />
     </Modal>
   );
 }
@@ -256,15 +438,14 @@ export default function DetallePuntoModal({ visible, punto, onClose }) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'transparent',
     justifyContent: 'flex-end',
   },
   sheet: {
     backgroundColor: BLANCO,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    maxHeight: '85%',
-    minHeight: '55%',
+    height: SHEET_ALTO,
     shadowColor: '#000',
     shadowOpacity: 0.25,
     shadowRadius: 10,
@@ -273,6 +454,9 @@ const styles = StyleSheet.create({
   handleBarContainer: {
     alignItems: 'center',
     paddingVertical: 10,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: 'hidden',
   },
   handleBar: {
     width: 45,
@@ -391,6 +575,173 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#334155',
     lineHeight: 20,
+  },
+  btnComoLlegar: {
+    backgroundColor: colors.primarySoft,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  btnComoLlegarTexto: {
+    color: colors.primary,
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  zonaBadgeModal: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textMuted,
+    marginTop: 8,
+  },
+  boxMototaxiSeguro: {
+    backgroundColor: colors.dangerSoft,
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 14,
+  },
+  mototaxiSeguroTitulo: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.danger,
+    marginBottom: 4,
+  },
+  mototaxiSeguroTexto: {
+    fontSize: 12,
+    color: '#7A271A',
+    lineHeight: 16,
+  },
+  btnSOSModal: {
+    marginTop: 8,
+    backgroundColor: colors.danger,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  btnSOSModalTexto: {
+    color: BLANCO,
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  quickFactsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 8,
+    marginBottom: 14,
+    flexWrap: 'wrap',
+  },
+  quickFactChip: {
+    backgroundColor: colors.surfaceMuted,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+  },
+  quickFactTexto: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  btnTicket: {
+    marginTop: 10,
+    backgroundColor: colors.primary,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  btnTicketTexto: {
+    color: BLANCO,
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  ticketOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  ticketCard: {
+    backgroundColor: BLANCO,
+    borderRadius: 24,
+    padding: 28,
+    width: '100%',
+    alignItems: 'center',
+  },
+  ticketRuta: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  ticketMonto: {
+    fontSize: 56,
+    fontWeight: '800',
+    color: colors.primary,
+    textAlign: 'center',
+  },
+  ticketUsd: {
+    fontSize: 16,
+    color: colors.textMuted,
+    marginTop: 4,
+  },
+  ticketNocturno: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.warning,
+    marginTop: 8,
+  },
+  ticketPie: {
+    fontSize: 12,
+    color: colors.textSubtle,
+    marginTop: 20,
+    textAlign: 'center',
+  },
+  ticketCerrar: {
+    fontSize: 12,
+    color: colors.textSubtle,
+    marginTop: 6,
+    fontStyle: 'italic',
+  },
+  fabAdmin: {
+    backgroundColor: colors.warning,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+  },
+  fabAdminTexto: { fontSize: 11, fontWeight: '700', color: BLANCO },
+  boxEstimado: {
+    backgroundColor: '#F3EEFA',
+    padding: 12,
+    borderRadius: 10,
+  },
+  estimadoTitulo: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#6B4A9E',
+    marginBottom: 6,
+  },
+  estimadoFila: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  estimadoDato: {
+    fontSize: 13,
+    color: '#334155',
+  },
+  estimadoTarifa: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.accent,
+  },
+  estimadoIndicacion: {
+    fontSize: 12,
+    color: '#475569',
+    marginTop: 6,
+    lineHeight: 16,
   },
   boxRecomendacion: {
     backgroundColor: '#FEF3C7',

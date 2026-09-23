@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet, ScrollView, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
+import LoginModal from './LoginModal';
+import { useAuth } from '../context/AuthContext';
+import { IDIOMAS } from '../i18n/locales';
 import { colors, radius, space } from '../theme';
 
 const SECCIONES = [
@@ -22,22 +26,24 @@ const SECCIONES = [
       { label: 'Ayuda y tarifas', sub: 'Emergencias y precios de transporte', icon: 'medkit-outline', ruta: '/(tabs)/emergencia' },
     ],
   },
-  {
-    titulo: 'Administración',
-    items: [
-      { label: 'Agregar lugar', sub: 'Publicar un nuevo punto en el mapa', icon: 'add-circle-outline', ruta: '/admin/nuevo-punto' },
-    ],
-  },
 ];
+
+const ITEM_ADMIN = { label: 'Agregar lugar', sub: 'Publicar un nuevo punto en el mapa', icon: 'add-circle-outline', ruta: '/admin/nuevo-punto' };
 
 export default function DrawerMenuModal({ visible, onClose, rutaActual }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t, i18n } = useTranslation();
+  const { usuario, esAdmin, cerrarSesion, cambiarIdioma, activarModoAdmin } = useAuth();
+  const [loginVisible, setLoginVisible] = useState(false);
+  const [selectorIdiomaVisible, setSelectorIdiomaVisible] = useState(false);
 
   const navegar = (ruta) => {
     onClose();
     router.push(ruta);
   };
+
+  const idiomaActual = IDIOMAS.find((i) => i.code === i18n.language) || IDIOMAS[0];
 
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
@@ -58,6 +64,49 @@ export default function DrawerMenuModal({ visible, onClose, rutaActual }) {
           </View>
 
           <ScrollView contentContainerStyle={{ paddingBottom: space.xl }} showsVerticalScrollIndicator={false}>
+            <View style={{ marginTop: space.lg }}>
+              <Text style={styles.seccion}>PERFIL</Text>
+
+              <Pressable
+                style={styles.item}
+                onPress={() => (usuario ? cerrarSesion() : setLoginVisible(true))}
+              >
+                <Icon name={usuario ? 'log-out-outline' : 'log-in-outline'} size={20} color={colors.textMuted} />
+                <View style={{ flex: 1, marginLeft: space.md }}>
+                  <Text style={styles.label}>{usuario ? t('cerrar_sesion') : t('iniciar_sesion')}</Text>
+                  <Text style={styles.sub}>{usuario ? (usuario.nombre + (esAdmin ? ' · Admin' : '')) : 'Apple, Google o invitado'}</Text>
+                </View>
+              </Pressable>
+
+              <Pressable style={styles.item} onPress={() => setSelectorIdiomaVisible((v) => !v)}>
+                <Icon name="language-outline" size={20} color={colors.textMuted} />
+                <View style={{ flex: 1, marginLeft: space.md }}>
+                  <Text style={styles.label}>{t('idioma_pais')}</Text>
+                  <Text style={styles.sub}>{idiomaActual.flag} {idiomaActual.label} · {idiomaActual.pais}</Text>
+                </View>
+                <Icon name={selectorIdiomaVisible ? 'chevron-up' : 'chevron-down'} size={16} color={colors.textSubtle} />
+              </Pressable>
+
+              {selectorIdiomaVisible && IDIOMAS.map((idm) => (
+                <Pressable
+                  key={idm.code}
+                  style={[styles.item, { paddingLeft: space.xl }]}
+                  onPress={() => { cambiarIdioma(idm.code, idm.pais); setSelectorIdiomaVisible(false); }}
+                >
+                  <Text style={{ fontSize: 16 }}>{idm.flag}</Text>
+                  <Text style={[styles.label, { marginLeft: space.md, flex: 1 }]}>{idm.label}</Text>
+                  {idm.code === idiomaActual.code && <Icon name="checkmark" size={16} color={colors.primary} />}
+                </Pressable>
+              ))}
+
+              {usuario && !esAdmin && (
+                <Pressable style={styles.item} onPress={activarModoAdmin}>
+                  <Icon name="shield-checkmark-outline" size={20} color={colors.textMuted} />
+                  <Text style={[styles.label, { marginLeft: space.md }]}>Activar {t('modo_admin')} (demo)</Text>
+                </Pressable>
+              )}
+            </View>
+
             {SECCIONES.map((sec) => (
               <View key={sec.titulo} style={{ marginTop: space.lg }}>
                 <Text style={styles.seccion}>{sec.titulo.toUpperCase()}</Text>
@@ -79,6 +128,23 @@ export default function DrawerMenuModal({ visible, onClose, rutaActual }) {
                 })}
               </View>
             ))}
+
+            {esAdmin && (
+              <View style={{ marginTop: space.lg }}>
+                <Text style={styles.seccion}>ADMINISTRACIÓN</Text>
+                <Pressable
+                  key={ITEM_ADMIN.ruta}
+                  onPress={() => navegar(ITEM_ADMIN.ruta)}
+                  style={styles.item}
+                >
+                  <Icon name={ITEM_ADMIN.icon} size={20} color={colors.textMuted} />
+                  <View style={{ flex: 1, marginLeft: space.md }}>
+                    <Text style={styles.label}>{ITEM_ADMIN.label}</Text>
+                    <Text style={styles.sub}>{ITEM_ADMIN.sub}</Text>
+                  </View>
+                </Pressable>
+              </View>
+            )}
           </ScrollView>
 
           <View style={[styles.footer, { paddingBottom: insets.bottom + space.md }]}>
@@ -86,6 +152,8 @@ export default function DrawerMenuModal({ visible, onClose, rutaActual }) {
           </View>
         </View>
       </View>
+
+      <LoginModal visible={loginVisible} onClose={() => setLoginVisible(false)} />
     </Modal>
   );
 }

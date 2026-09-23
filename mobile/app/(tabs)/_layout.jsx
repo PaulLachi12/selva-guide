@@ -16,10 +16,13 @@ export default function TabLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSubtle,
+        // Sin position:'absolute': la tab bar reserva su propio espacio en el layout,
+        // así el MapView (capa nativa) nunca se dibuja por encima de ella ni la distorsiona.
         tabBarStyle: {
-          backgroundColor: colors.surface,
+          backgroundColor: 'rgba(255,255,255,0.95)',
           borderTopColor: colors.border,
           borderTopWidth: 0.5,
+          elevation: 8,
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       }}

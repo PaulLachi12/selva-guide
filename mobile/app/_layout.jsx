@@ -2,6 +2,9 @@
 import { View, Text, ActivityIndicator, StatusBar } from 'react-native';
 import { SQLiteProvider } from 'expo-sqlite';
 import { Stack } from 'expo-router';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../src/i18n';
+import { AuthProvider } from '../src/context/AuthContext';
 
 async function migrar(db) {
   await db.execAsync(`
@@ -66,10 +69,14 @@ export default function Layout() {
         <Text style={{ marginTop: 12, fontFamily: 'Georgia', fontSize: 14, color: '#0E1D17' }}>Preparando SelvaGuide...</Text>
       </View>
     }>
-      <SQLiteProvider databaseName="selvaguide.db" onInit={migrar} useSuspense>
-        <StatusBar barStyle="dark-content" backgroundColor="#F4F1EA" />
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#F4F1EA' } }} />
-      </SQLiteProvider>
+      <I18nextProvider i18n={i18n}>
+        <AuthProvider>
+          <SQLiteProvider databaseName="selvaguide.db" onInit={migrar} useSuspense>
+            <StatusBar barStyle="dark-content" backgroundColor="#F4F1EA" />
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#F4F1EA' } }} />
+          </SQLiteProvider>
+        </AuthProvider>
+      </I18nextProvider>
     </Suspense>
   );
 }
