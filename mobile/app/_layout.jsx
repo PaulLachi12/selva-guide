@@ -1,10 +1,12 @@
-﻿import { Suspense } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { View, Text, ActivityIndicator, StatusBar } from 'react-native';
 import { SQLiteProvider } from 'expo-sqlite';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
+import Storage from 'expo-sqlite/kv-store';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../src/i18n';
 import { AuthProvider } from '../src/context/AuthContext';
+import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
 
 async function migrar(db) {
   await db.execAsync(`
@@ -61,6 +63,37 @@ async function migrar(db) {
   }
 }
 
+// Primer arranque: muestra 'Iquitos en 1 minuto' una sola vez.
+function RedireccionBienvenida() {
+  const router = useRouter();
+  const hecho = useRef(false);
+  useEffect(() => {
+    if (hecho.current) return;
+    hecho.current = true;
+    let activo = true;
+    Storage.getItem('bienvenida_vista')
+      .then((v) => {
+        if (!activo || v) return;
+        // Espera un tick para que el Stack esté montado antes de navegar.
+        setTimeout(() => { if (activo) router.replace('/bienvenida'); }, 0);
+      })
+      .catch(() => {});
+    return () => { activo = false; };
+  }, [router]);
+  return null;
+}
+
+function RaizConTema() {
+  const { colors, isDark } = useTheme();
+  return (
+    <>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg} />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
+      <RedireccionBienvenida />
+    </>
+  );
+}
+
 export default function Layout() {
   return (
     <Suspense fallback={
@@ -71,10 +104,11 @@ export default function Layout() {
     }>
       <I18nextProvider i18n={i18n}>
         <AuthProvider>
-          <SQLiteProvider databaseName="selvaguide.db" onInit={migrar} useSuspense>
-            <StatusBar barStyle="dark-content" backgroundColor="#F4F1EA" />
-            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#F4F1EA' } }} />
-          </SQLiteProvider>
+          <ThemeProvider>
+            <SQLiteProvider databaseName="selvaguide.db" onInit={migrar} useSuspense>
+              <RaizConTema />
+            </SQLiteProvider>
+          </ThemeProvider>
         </AuthProvider>
       </I18nextProvider>
     </Suspense>

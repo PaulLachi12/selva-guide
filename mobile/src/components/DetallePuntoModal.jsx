@@ -14,22 +14,27 @@ import {
   Dimensions
 } from 'react-native';
 import * as Speech from 'expo-speech';
+import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import GlassView from './GlassView';
 import AdminEditModal from './AdminEditModal';
 import { agregarResenaAPunto, tarifaMototaxi, esHorarioNocturno } from '../data/puntosData';
 import { useAuth } from '../context/AuthContext';
 import Icon from './Icon';
-import { colors, space, radius, shadow } from '../theme';
+import { space, radius, shadow } from '../theme';
+import { useTranslation } from 'react-i18next';
+import { useTheme, useThemedStyles } from '../context/ThemeContext';
+import { usePuntoTexto } from '../i18n/contenido';
+import { urlGoogleMaps, abrirExterna } from '../services/navegacion';
 
-const VERDE_N = colors.primary;
-const VERDE_B = colors.primary;
-const VERDE_A = colors.primary;
-const BLANCO = colors.surface;
-const TINTA = colors.text;
-const GRIS = colors.textMuted;
-const GRIS_CLARO = colors.surfaceMuted;
-const LINEA = colors.border;
+const VOZ_IDIOMA = { es: 'es-PE', en: 'en-US', fr: 'fr-FR', pt: 'pt-BR' };
+
+// Texto de tarifa traducido a partir de los campos neutros de tarifaMototaxi()
+export function textoTarifa(t, tarifa) {
+  if (!tarifa) return '';
+  return t('comun.tarifa_completa', { soles: tarifa.etiqueta, usd: tarifa.etiquetaUsd })
+    + (tarifa.nocturno ? t('comun.sufijo_recargo_nocturno') : '');
+}
 
 function formatearDuracionModal(seg) {
   const min = Math.round(seg / 60);
@@ -51,6 +56,7 @@ const SNAP_MINI = Math.max(0, SHEET_ALTO - ALTO_PANTALLA * 0.15);
 const SNAP_CERRADO = SHEET_ALTO;
 
 export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, onComoLlegar, onClose }) {
+  const router = useRouter();
   const [hablando, setHablando] = useState(false);
   const [modalResena, setModalResena] = useState(false);
   const [nombreAutor, setNombreAutor] = useState('');
@@ -59,6 +65,10 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
   const [ticketVisible, setTicketVisible] = useState(false);
   const [adminEditVisible, setAdminEditVisible] = useState(false);
   const { esAdmin } = useAuth();
+  const { t, i18n } = useTranslation();
+  const tp = usePuntoTexto();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(crearEstilos);
 
   // Animación de deslizamiento con 3 posiciones (Minimizado / Medio / Desplegado)
   const translateY = useRef(new Animated.Value(SNAP_MEDIO)).current;
@@ -127,9 +137,9 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
       setHablando(false);
     } else {
       setHablando(true);
-      const texto = punto.audio || `${punto.nombre}. ${punto.descripcionLarga || punto.descripcionCorta}`;
+      const texto = tp(punto, 'audio') || `${tp(punto, 'nombre')}. ${tp(punto, 'descripcionLarga') || tp(punto, 'descripcionCorta')}`;
       Speech.speak(texto, {
-        language: 'es-PE',
+        language: VOZ_IDIOMA[(i18n.language || 'es').slice(0, 2)] || 'es-PE',
         pitch: 1.0,
         rate: 0.95,
         onDone: () => setHablando(false),
@@ -142,23 +152,23 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
 
   const llamarSOS = () => {
     Linking.openURL('tel:+51065231152').catch(() => {
-      Alert.alert('Emergencia', 'Policía de Turismo de Iquitos (POLTUR): (065) 231152');
+      Alert.alert(t('comun.emergencia'), t('comun.poltur_telefono'));
     });
   };
 
   const contactarWhatsApp = () => {
     const telefono = punto.telefono ? punto.telefono.replace(/[^0-9]/g, '') : '51965842100';
     const mensaje = encodeURIComponent(
-      `¡Hola! Me comunico desde la app Selva Guía • Iquitos. Quisiera coordinar una visita / reserva para "${punto.nombre}".`
+      t('detalle.whatsapp_mensaje', { nombre: tp(punto, 'nombre') })
     );
     Linking.openURL(`https://wa.me/${telefono}?text=${mensaje}`).catch(() => {
-      Alert.alert('Error', 'No se pudo abrir WhatsApp en este dispositivo.');
+      Alert.alert(t('detalle.error'), t('detalle.whatsapp_error'));
     });
   };
 
   const enviarResena = () => {
     if (!nombreAutor.trim() || !comentario.trim()) {
-      Alert.alert('Atención', 'Por favor escribe tu nombre y tu comentario.');
+      Alert.alert(t('detalle.atencion'), t('detalle.resena_faltan_datos'));
       return;
     }
     agregarResenaAPunto(punto.id, {
@@ -166,13 +176,13 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
       autor: nombreAutor.trim(),
       rating: estrellas,
       comentario: comentario.trim(),
-      fecha: 'Reciente',
+      fecha: t('detalle.reciente'),
     });
     setNombreAutor('');
     setComentario('');
     setEstrellas(5);
     setModalResena(false);
-    Alert.alert('¡Gracias!', 'Tu reseña ha sido publicada con éxito.');
+    Alert.alert(t('detalle.gracias'), t('detalle.resena_publicada'));
   };
 
   return (
@@ -182,7 +192,7 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
         <Pressable style={StyleSheet.absoluteFill} onPress={cerrarConSlide} />
         <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
           {/* Header Bar (arrastrable: swipe down para cerrar, o snap a Mini/Medio/Full) */}
-          <GlassView tint="light" style={styles.handleBarContainer} {...panResponder.panHandlers}>
+          <GlassView style={styles.handleBarContainer} {...panResponder.panHandlers}>
             <View style={styles.handleBar} />
           </GlassView>
 
@@ -190,34 +200,34 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
             {/* Header Información */}
             <View style={styles.headerInfo}>
               <View style={styles.badgeCategoria}>
-                <Text style={styles.badgeTexto}>
-                  {punto.subcategoria || (punto.categoria ? punto.categoria.toUpperCase() : 'LUGAR')}
+                <Text style={styles.badgeTexto} numberOfLines={1} ellipsizeMode="tail">
+                  {tp(punto, 'subcategoria') || (punto.categoria ? t(`categoria_${punto.categoria}`, { defaultValue: punto.categoria }).toUpperCase() : t('detalle.lugar'))}
                 </Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 {esAdmin && (
                   <Pressable onPress={() => setAdminEditVisible(true)} style={styles.fabAdmin}>
-                    <Text style={styles.fabAdminTexto}>✏️ Modo Admin</Text>
+                    <Text style={styles.fabAdminTexto}>✏️ {t('modo_admin')}</Text>
                   </Pressable>
                 )}
-                <Pressable onPress={cerrarConSlide} style={styles.btnCerrar} hitSlop={10}>
+                <Pressable onPress={cerrarConSlide} style={styles.btnCerrar} hitSlop={10} accessibilityLabel={t('comun.cerrar')}>
                   <Text style={styles.btnCerrarTexto}>×</Text>
                 </Pressable>
               </View>
             </View>
 
-            <Text style={styles.titulo}>{punto.nombre}</Text>
+            <Text style={styles.titulo} numberOfLines={2} ellipsizeMode="tail">{tp(punto, 'nombre')}</Text>
 
             {/* Quick Facts: la info clave de un vistazo, sin texto florido */}
             <View style={styles.quickFactsRow}>
               <View style={styles.quickFactChip}>
                 <Text style={styles.quickFactTexto}>
-                  {ruta ? `⏱️ ${formatearDuracionModal(ruta.duracion)}` : `⏱️ ${punto.distancia || 'Iquitos'}`}
+                  {ruta ? `⏱️ ${formatearDuracionModal(ruta.duracion)}` : `⏱️ ${tp(punto, 'distancia') || 'Iquitos'}`}
                 </Text>
               </View>
               <View style={styles.quickFactChip}>
                 <Text style={styles.quickFactTexto}>
-                  {tarifaActual ? `💵 ${tarifaActual.etiqueta}` : `💵 ${punto.costo || 'Consultar'}`}
+                  {tarifaActual ? `💵 ${tarifaActual.etiqueta}` : `💵 ${tp(punto, 'costo') || t('detalle.consultar')}`}
                 </Text>
               </View>
               <View style={styles.quickFactChip}>
@@ -230,15 +240,15 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
             {(punto.categoria === 'turistico' || punto.tieneAudioGuia === true) && (
               <View style={styles.audioCard}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.audioTitulo}>Audio-guía</Text>
-                  <Text style={styles.audioSub}>Narración guiada en voz alta con acento loretano</Text>
+                  <Text style={styles.audioTitulo}>{t('audio_guia')}</Text>
+                  <Text style={styles.audioSub}>{t('detalle.audio_sub')}</Text>
                 </View>
                 <Pressable
                   onPress={alternarAudio}
                   style={[styles.btnAudio, hablando && styles.btnAudioActivo]}
                 >
                   <Text style={styles.btnAudioTexto}>
-                    {hablando ? '⏸ Detener' : '▶ Escuchar'}
+                    {hablando ? t('detener') : t('escuchar')}
                   </Text>
                 </Pressable>
               </View>
@@ -246,56 +256,67 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
 
             {/* Cómo llegar y Ubicación */}
             <View style={styles.seccion}>
-              <Text style={styles.seccionTitulo}>Cómo llegar & Acceso</Text>
+              <Text style={styles.seccionTitulo}>{t('detalle.como_llegar_acceso')}</Text>
               <Text style={styles.seccionTexto}>
-                <Text style={{ fontWeight: '700' }}>Ruta: </Text>
-                {punto.acceso || 'Mototaxi o peke-peke'}
+                <Text style={{ fontWeight: '700' }}>{t('detalle.ruta_label')} </Text>
+                {tp(punto, 'acceso') || t('detalle.acceso_defecto')}
               </Text>
               <Text style={styles.seccionTexto}>
-                <Text style={{ fontWeight: '700' }}>Distancia / Ubicación: </Text>
-                {punto.distancia || 'Iquitos, Loreto'}
+                <Text style={{ fontWeight: '700' }}>{t('detalle.distancia_label')} </Text>
+                {tp(punto, 'distancia') || 'Iquitos, Loreto'}
               </Text>
+              {punto.tarifaDesdePlaza ? (
+                <Text style={styles.seccionTexto}>
+                  {t('detalle.tarifa_desde_plaza', { tarifa: tp(punto, 'tarifaDesdePlaza') })}
+                </Text>
+              ) : null}
             </View>
 
             {/* Botón "Cómo llegar": dispara cálculo de ruta y tarifa en mototaxi */}
             <Pressable
-              onPress={() => onComoLlegar && onComoLlegar(punto)}
+              onPress={() => {
+                if (onComoLlegar) return onComoLlegar(punto);
+                // Desde pestañas secundarias: cerrar modal y abrir el mapa con este destino
+                onClose && onClose();
+                router.navigate({ pathname: '/(tabs)', params: { destino: String(punto.id) } });
+              }}
               style={styles.btnComoLlegar}
             >
-              <Text style={styles.btnComoLlegarTexto}>🛺 Cómo llegar - Ver ruta y tarifa</Text>
+              <Text style={styles.btnComoLlegarTexto}>{t('como_llegar_boton')}</Text>
             </Pressable>
+            <View style={styles.filaExternas}>
+              <Pressable onPress={() => abrirExterna(urlGoogleMaps(punto), t)} style={styles.btnExterna}>
+                <Icon name="logo-google" size={14} color={colors.primary} />
+                <Text style={styles.btnExternaTexto} numberOfLines={1}>{t('nav.google_maps')}</Text>
+              </Pressable>
+            </View>
 
             <View style={styles.boxMototaxiSeguro}>
-              <Text style={styles.mototaxiSeguroTitulo}>Mototaxi Seguro</Text>
-              <Text style={styles.mototaxiSeguroTexto}>
-                Verifica que la moto tenga placa y calcomanía de empadronamiento visibles, y acuerda la tarifa antes de subir.
-              </Text>
+              <Text style={styles.mototaxiSeguroTitulo}>{t('detalle.mototaxi_seguro')}</Text>
+              <Text style={styles.mototaxiSeguroTexto}>{t('detalle.mototaxi_seguro_texto')}</Text>
               <Pressable onPress={llamarSOS} style={styles.btnSOSModal}>
-                <Text style={styles.btnSOSModalTexto}>🆘 SOS / Policía de Turismo de Iquitos</Text>
+                <Text style={styles.btnSOSModalTexto}>{t('detalle.sos_poltur')}</Text>
               </Pressable>
             </View>
 
             {cargandoRuta && !ruta && (
               <View style={[styles.seccion, styles.boxEstimado]}>
-                <Text style={styles.estimadoTitulo}>Calculando ruta y tarifa en Mototaxi…</Text>
+                <Text style={styles.estimadoTitulo}>{t('detalle.calculando_ruta')}</Text>
               </View>
             )}
 
             {/* Estimado de viaje en mototaxi */}
             {ruta && (
               <View style={[styles.seccion, styles.boxEstimado]}>
-                <Text style={styles.estimadoTitulo}>Tarifa estimada en Mototaxi</Text>
+                <Text style={styles.estimadoTitulo}>{t('tarifa_mototaxi')}</Text>
                 <Text style={styles.estimadoDato}>
                   {formatearDistanciaModal(ruta.distancia)} · {formatearDuracionModal(ruta.duracion)}
                 </Text>
                 <Text style={styles.estimadoTarifa}>
-                  Tarifa estimada en Mototaxi: {tarifaMototaxi(ruta.distancia).etiquetaCompleta}
+                  {t('comun.tarifa_estimada_linea', { tarifa: textoTarifa(t, tarifaActual) })}
                 </Text>
                 <Text style={styles.estimadoIndicacion}>
-                  Ruta recomendada: {punto.acceso || 'consultar con el mototaxista la vía más directa'}.
-                </Text>
-                <Text style={styles.zonaBadgeModal}>
-                  {esHorarioNocturno() ? '⚠️ Precaución de noche: prefiere mototaxis con placa visible.' : '✅ Zona Turística Sugerida'}
+                  {t('detalle.ruta_recomendada', { ruta: tp(punto, 'acceso') || t('detalle.ruta_recomendada_defecto') })}
                 </Text>
                 <Pressable
                   onPress={() => {
@@ -304,7 +325,7 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
                   }}
                   style={styles.btnTicket}
                 >
-                  <Text style={styles.btnTicketTexto}>📱 Mostrar tarifa al chofer</Text>
+                  <Text style={styles.btnTicketTexto}>{t('mostrar_tarifa_chofer')}</Text>
                 </Pressable>
               </View>
             )}
@@ -312,39 +333,37 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
             {/* Descripción: texto directo, sin encabezado redundante */}
             <View style={styles.seccion}>
               <Text style={styles.descripcionTexto}>
-                {punto.descripcionLarga || punto.descripcionCorta}
+                {tp(punto, 'descripcionLarga') || tp(punto, 'descripcionCorta')}
               </Text>
             </View>
 
             {/* Recomendaciones de Campo */}
             {punto.recomendaciones && (
               <View style={[styles.seccion, styles.boxRecomendacion]}>
-                <Text style={styles.recomTitulo}>Recomendaciones</Text>
-                <Text style={styles.recomTexto}>{punto.recomendaciones}</Text>
+                <Text style={styles.recomTitulo}>{t('detalle.recomendaciones')}</Text>
+                <Text style={styles.recomTexto}>{tp(punto, 'recomendaciones')}</Text>
               </View>
             )}
 
             {/* Botón WhatsApp de Acción Directa */}
             <Pressable onPress={contactarWhatsApp} style={styles.btnWhatsApp}>
-              <Text style={styles.btnWhatsAppTexto}>
-                Consultar por WhatsApp
-              </Text>
+              <Text style={styles.btnWhatsAppTexto}>{t('consultar_whatsapp')}</Text>
             </Pressable>
 
             {/* Sección de Reseñas */}
             <View style={styles.seccionResenas}>
               <View style={styles.resenasHeader}>
-                <Text style={styles.seccionTitulo}>⭐ Reseñas de Viajeros</Text>
+                <Text style={styles.seccionTitulo}>{t('resenas_titulo')}</Text>
                 <Pressable
                   onPress={() => setModalResena(true)}
                   style={styles.btnEscribirResena}
                 >
-                  <Text style={styles.btnEscribirTexto}>+ Dejar Reseña</Text>
+                  <Text style={styles.btnEscribirTexto}>{t('dejar_resena')}</Text>
                 </Pressable>
               </View>
 
               {(!punto.resenas || punto.resenas.length === 0) ? (
-                <Text style={styles.sinResenas}>Aún no hay reseñas. ¡Sé el primero en calificar!</Text>
+                <Text style={styles.sinResenas}>{t('detalle.sin_resenas')}</Text>
               ) : (
                 punto.resenas.map((r) => (
                   <View key={r.id} style={styles.resenaCard}>
@@ -353,7 +372,7 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
                       <Text style={styles.resenaEstrellas}>{''.repeat(r.rating || 5)}</Text>
                     </View>
                     <Text style={styles.resenaComentario}>{r.comentario}</Text>
-                    <Text style={styles.resenaFecha}>{r.fecha || 'Reciente'}</Text>
+                    <Text style={styles.resenaFecha}>{r.fecha || t('detalle.reciente')}</Text>
                   </View>
                 ))
               )}
@@ -368,18 +387,19 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
       <Modal visible={modalResena} animationType="fade" transparent onRequestClose={() => setModalResena(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitulo}>Escribir Reseña</Text>
-            <Text style={styles.modalSub}>{punto.nombre}</Text>
+            <Text style={styles.modalTitulo}>{t('detalle.escribir_resena')}</Text>
+            <Text style={styles.modalSub}>{tp(punto, 'nombre')}</Text>
 
-            <Text style={styles.inputLabel}>Tu Nombre</Text>
+            <Text style={styles.inputLabel}>{t('detalle.tu_nombre')}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ej: Marco Polo"
+              placeholder={t('detalle.nombre_placeholder')}
+              placeholderTextColor={colors.textSubtle}
               value={nombreAutor}
               onChangeText={setNombreAutor}
             />
 
-            <Text style={styles.inputLabel}>Calificación</Text>
+            <Text style={styles.inputLabel}>{t('detalle.calificacion')}</Text>
             <View style={styles.starsSelector}>
               {[1, 2, 3, 4, 5].map((s) => (
                 <Pressable key={s} onPress={() => setEstrellas(s)}>
@@ -388,10 +408,11 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
               ))}
             </View>
 
-            <Text style={styles.inputLabel}>Comentario / Experiencia</Text>
+            <Text style={styles.inputLabel}>{t('detalle.comentario')}</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
-              placeholder="Cuéntanos qué tal la comida, el acceso, el guía o el precio..."
+              placeholder={t('detalle.comentario_placeholder')}
+              placeholderTextColor={colors.textSubtle}
               multiline
               numberOfLines={4}
               value={comentario}
@@ -400,10 +421,10 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
 
             <View style={styles.modalActions}>
               <Pressable onPress={() => setModalResena(false)} style={styles.btnCancelarModal}>
-                <Text style={styles.btnCancelarTexto}>Cancelar</Text>
+                <Text style={styles.btnCancelarTexto}>{t('cancelar')}</Text>
               </Pressable>
               <Pressable onPress={enviarResena} style={styles.btnPublicarModal}>
-                <Text style={styles.btnPublicarTexto}>Publicar</Text>
+                <Text style={styles.btnPublicarTexto}>{t('detalle.publicar')}</Text>
               </Pressable>
             </View>
           </View>
@@ -414,14 +435,14 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
       <Modal visible={ticketVisible} animationType="fade" transparent onRequestClose={() => setTicketVisible(false)}>
         <Pressable style={styles.ticketOverlay} onPress={() => setTicketVisible(false)}>
           <View style={styles.ticketCard}>
-            <Text style={styles.ticketRuta}>RUTA A {(punto.nombre || '').toUpperCase()}</Text>
+            <Text style={styles.ticketRuta}>{t('detalle.ticket_ruta_a', { nombre: (tp(punto, 'nombre') || '').toUpperCase() })}</Text>
             <Text style={styles.ticketMonto}>
-              {tarifaActual ? `S/ ${tarifaActual.min}.00 - S/ ${tarifaActual.max}.00` : 'Consultar tarifa'}
+              {tarifaActual ? `S/ ${tarifaActual.min}.00 - S/ ${tarifaActual.max}.00` : t('detalle.consultar_tarifa')}
             </Text>
             {tarifaActual && <Text style={styles.ticketUsd}>{tarifaActual.etiquetaUsd}</Text>}
-            {tarifaActual?.nocturno && <Text style={styles.ticketNocturno}>Incluye recargo nocturno</Text>}
-            <Text style={styles.ticketPie}>Tarifa referencial en Mototaxi · Selva Guía Iquitos</Text>
-            <Text style={styles.ticketCerrar}>Toca para cerrar</Text>
+            {tarifaActual?.nocturno && <Text style={styles.ticketNocturno}>{t('comun.incluye_recargo_nocturno')}</Text>}
+            <Text style={styles.ticketPie}>{t('detalle.ticket_pie')}</Text>
+            <Text style={styles.ticketCerrar}>{t('detalle.toca_cerrar')}</Text>
           </View>
         </Pressable>
       </Modal>
@@ -435,14 +456,14 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
   );
 }
 
-const styles = StyleSheet.create({
+const crearEstilos = (colors) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'transparent',
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: BLANCO,
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     height: SHEET_ALTO,
@@ -462,7 +483,7 @@ const styles = StyleSheet.create({
     width: 45,
     height: 5,
     borderRadius: 3,
-    backgroundColor: '#CBD5E1',
+    backgroundColor: colors.border,
   },
   scroll: {
     paddingHorizontal: 20,
@@ -474,13 +495,15 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   badgeCategoria: {
-    backgroundColor: '#E6F4EA',
+    flexShrink: 1,
+    marginRight: 8,
+    backgroundColor: colors.primarySoft,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
   },
   badgeTexto: {
-    color: VERDE_N,
+    color: colors.primary,
     fontSize: 12,
     fontWeight: '700',
   },
@@ -488,19 +511,19 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: GRIS_CLARO,
+    backgroundColor: colors.surfaceMuted,
     alignItems: 'center',
     justifyContent: 'center',
   },
   btnCerrarTexto: {
     fontSize: 16,
-    color: TINTA,
+    color: colors.text,
     fontWeight: '700',
   },
   titulo: {
     fontSize: 22,
     fontWeight: '700',
-    color: TINTA,
+    color: colors.text,
     marginTop: 8,
   },
   metaRow: {
@@ -520,13 +543,13 @@ const styles = StyleSheet.create({
   },
   metaItem: {
     fontSize: 13,
-    color: GRIS,
+    color: colors.textMuted,
   },
   audioCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAF9',
-    borderColor: '#C6E7D9',
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.primarySoft,
     borderWidth: 1,
     borderRadius: 12,
     padding: 12,
@@ -535,25 +558,25 @@ const styles = StyleSheet.create({
   audioTitulo: {
     fontSize: 14,
     fontWeight: '700',
-    color: VERDE_N,
+    color: colors.primary,
   },
   audioSub: {
     fontSize: 11,
-    color: GRIS,
+    color: colors.textMuted,
     marginTop: 2,
   },
   btnAudio: {
-    backgroundColor: VERDE_B,
+    backgroundColor: colors.primary,
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
     marginLeft: 10,
   },
   btnAudioActivo: {
-    backgroundColor: '#DC2626',
+    backgroundColor: colors.danger,
   },
   btnAudioTexto: {
-    color: BLANCO,
+    color: colors.onPrimary,
     fontWeight: '700',
     fontSize: 13,
   },
@@ -563,19 +586,32 @@ const styles = StyleSheet.create({
   seccionTitulo: {
     fontSize: 15,
     fontWeight: '700',
-    color: TINTA,
+    color: colors.text,
     marginBottom: 4,
   },
   seccionTexto: {
     fontSize: 13,
-    color: '#334155',
+    color: colors.text,
     lineHeight: 18,
   },
   descripcionTexto: {
     fontSize: 14,
-    color: '#334155',
+    color: colors.text,
     lineHeight: 20,
   },
+  filaExternas: { flexDirection: 'row', gap: space.sm, marginBottom: space.md },
+  btnExterna: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    height: 34,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  btnExternaTexto: { fontSize: 13, fontWeight: '600', color: colors.primary, flexShrink: 1 },
   btnComoLlegar: {
     backgroundColor: colors.primarySoft,
     borderWidth: 1,
@@ -610,7 +646,7 @@ const styles = StyleSheet.create({
   },
   mototaxiSeguroTexto: {
     fontSize: 12,
-    color: '#7A271A',
+    color: colors.danger,
     lineHeight: 16,
   },
   btnSOSModal: {
@@ -621,7 +657,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnSOSModalTexto: {
-    color: BLANCO,
+    color: colors.onPrimary,
     fontWeight: '700',
     fontSize: 12,
   },
@@ -651,7 +687,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnTicketTexto: {
-    color: BLANCO,
+    color: colors.onPrimary,
     fontWeight: '700',
     fontSize: 13,
   },
@@ -663,7 +699,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   ticketCard: {
-    backgroundColor: BLANCO,
+    backgroundColor: colors.surface,
     borderRadius: 24,
     padding: 28,
     width: '100%',
@@ -711,16 +747,16 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: radius.pill,
   },
-  fabAdminTexto: { fontSize: 11, fontWeight: '700', color: BLANCO },
+  fabAdminTexto: { fontSize: 11, fontWeight: '700', color: colors.onPrimary },
   boxEstimado: {
-    backgroundColor: '#F3EEFA',
+    backgroundColor: colors.accentSoft,
     padding: 12,
     borderRadius: 10,
   },
   estimadoTitulo: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#6B4A9E',
+    color: colors.accent,
     marginBottom: 6,
   },
   estimadoFila: {
@@ -730,7 +766,7 @@ const styles = StyleSheet.create({
   },
   estimadoDato: {
     fontSize: 13,
-    color: '#334155',
+    color: colors.text,
   },
   estimadoTarifa: {
     fontSize: 14,
@@ -739,46 +775,46 @@ const styles = StyleSheet.create({
   },
   estimadoIndicacion: {
     fontSize: 12,
-    color: '#475569',
+    color: colors.textMuted,
     marginTop: 6,
     lineHeight: 16,
   },
   boxRecomendacion: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: colors.surfaceMuted,
     padding: 12,
     borderRadius: 10,
   },
   recomTitulo: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#92400E',
+    color: colors.warning,
     marginBottom: 2,
   },
   recomTexto: {
     fontSize: 13,
-    color: '#78350F',
+    color: colors.text,
     lineHeight: 18,
   },
   btnWhatsApp: {
-    backgroundColor: VERDE_A,
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
     marginVertical: 12,
-    shadowColor: VERDE_A,
+    shadowColor: colors.primary,
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 4,
   },
   btnWhatsAppTexto: {
-    color: BLANCO,
+    color: colors.onPrimary,
     fontSize: 15,
     fontWeight: '700',
   },
   seccionResenas: {
     marginTop: 10,
     borderTopWidth: 1,
-    borderTopColor: LINEA,
+    borderTopColor: colors.border,
     paddingTop: 14,
   },
   resenasHeader: {
@@ -788,18 +824,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   btnEscribirResena: {
-    backgroundColor: '#E0F2FE',
+    backgroundColor: colors.primarySoft,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 6,
   },
   btnEscribirTexto: {
-    color: '#0284C7',
+    color: colors.primary,
     fontSize: 12,
     fontWeight: '700',
   },
   sinResenas: {
-    color: GRIS,
+    color: colors.textMuted,
     fontStyle: 'italic',
     fontSize: 13,
     marginVertical: 6,
@@ -820,15 +856,15 @@ const styles = StyleSheet.create({
   resenaAutor: {
     fontSize: 13,
     fontWeight: '700',
-    color: TINTA,
+    color: colors.text,
   },
   resenaEstrellas: {
     fontSize: 13,
-    color: '#EAB308',
+    color: colors.star,
   },
   resenaComentario: {
     fontSize: 13,
-    color: '#475569',
+    color: colors.textMuted,
     marginTop: 4,
     lineHeight: 18,
   },
@@ -847,7 +883,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    backgroundColor: BLANCO,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 20,
     width: '100%',
@@ -856,27 +892,29 @@ const styles = StyleSheet.create({
   modalTitulo: {
     fontSize: 18,
     fontWeight: '700',
-    color: VERDE_N,
+    color: colors.primary,
   },
   modalSub: {
     fontSize: 13,
-    color: GRIS,
+    color: colors.textMuted,
     marginBottom: 14,
   },
   inputLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: TINTA,
+    color: colors.text,
     marginBottom: 4,
     marginTop: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: LINEA,
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     height: 42,
     fontSize: 14,
+    color: colors.text,
+    backgroundColor: colors.surface,
   },
   textArea: {
     height: 80,
@@ -889,7 +927,7 @@ const styles = StyleSheet.create({
   },
   starBtn: {
     fontSize: 28,
-    color: '#CBD5E1',
+    color: colors.border,
     marginRight: 8,
   },
   starBtnActive: {
@@ -906,17 +944,17 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   btnCancelarTexto: {
-    color: GRIS,
+    color: colors.textMuted,
     fontWeight: '600',
   },
   btnPublicarModal: {
-    backgroundColor: VERDE_B,
+    backgroundColor: colors.primary,
     paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 8,
   },
   btnPublicarTexto: {
-    color: BLANCO,
+    color: colors.onPrimary,
     fontWeight: '700',
   },
 });

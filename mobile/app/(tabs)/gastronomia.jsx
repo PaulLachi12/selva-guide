@@ -11,83 +11,33 @@ import DetallePuntoModal from '../../src/components/DetallePuntoModal';
 import DrawerMenuModal from '../../src/components/DrawerMenuModal';
 import ScreenHeader from '../../src/components/ScreenHeader';
 import Icon from '../../src/components/Icon';
-import { colors, space, radius, shadow } from '../../src/theme';
+import { useTranslation } from 'react-i18next';
+import { useTheme, useThemedStyles } from '../../src/context/ThemeContext';
+import { usePuntoTexto } from '../../src/i18n/contenido';
 
-const VERDE_N = colors.primary;
-const VERDE_B = colors.primary;
-const BLANCO = colors.surface;
-const TINTA = colors.text;
-const GRIS = colors.textMuted;
-const CREMA = colors.bg;
-
-// Diccionario visual de platos amazónicos
+// Diccionario visual de platos amazónicos. Textos en gastro.platos.<id>.<campo>
 const DICCIONARIO_PLATOS = [
-  {
-    id: 'juane',
-    nombre: 'Juane Tradicional',
-    icono: 'leaf-outline',
-    queEs: 'El plato rey de la Amazonía. Masa de arroz sazonada con palillo, especias, huevo duro y presa de gallina, envuelta y cocida en hojas de bijao.',
-    comoComer: 'Se desenvuelve la hoja con la mano y se acompaña con ají de cocona y plátano maduro frito.',
-    audacia: 'Fácil (Apto para todos los paladares)',
-    precioAprox: 'S/ 7.00 en mercado • S/ 25.00 en restaurante',
-  },
-  {
-    id: 'tacacho',
-    nombre: 'Tacacho con Cecina y Chorizo',
-    icono: 'flame-outline',
-    queEs: 'Bolas de plátano bellaco verde asado o frito majado con manteca de chancho y chicharrón, servido con cecina (cerdo ahumado de monte) y chorizo artesanal loretano.',
-    comoComer: 'Desmenuza la cecina y acompáñala con un bocado de tacacho humeante.',
-    audacia: 'Fácil (Sabor ahumado irresistible)',
-    precioAprox: 'S/ 12.00 a S/ 32.00',
-  },
-  {
-    id: 'paiche',
-    nombre: 'Paiche (Arapaima Gigas)',
-    icono: 'fish-outline',
-    queEs: 'El pez de agua dulce con escamas más grande del mundo. Su carne es blanca, firme, sin espinas pequeñas y de sabor suave y refinado.',
-    comoComer: 'A la parrilla, en chicharrón crocante o en cebiche amazónico con ají charapita.',
-    audacia: 'Fácil (Experiencia gourmet recomendada)',
-    precioAprox: 'S/ 35.00 a S/ 65.00',
-  },
-  {
-    id: 'patarashca',
-    nombre: 'Patarashca de Doncella',
-    icono: 'leaf-outline',
-    queEs: 'Pescado amazónico condimentado con sachaculantro (culantro de monte), cebolla y ají dulce, envuelto en hojas de bijao y asado lentamente sobre carbón.',
-    comoComer: 'La hoja retiene todos los jugos naturales del pescado sin necesidad de grasa añadida.',
-    audacia: 'Fácil y muy saludable',
-    precioAprox: 'S/ 10.00 en mercado • S/ 30.00 en restaurante',
-  },
-  {
-    id: 'chonta',
-    nombre: 'Ensalada de Chonta (Palmito fresco)',
-    icono: 'nutrition-outline',
-    queEs: 'Tiras finas extraídas del corazón de la palmera amazónica. Es fresca, crujiente y se sirve fría con limón, sal y aceite.',
-    comoComer: 'La entrada perfecta para contrarrestar el calor húmedo de la selva.',
-    audacia: 'Fácil (Ligera y refrescante)',
-    precioAprox: 'S/ 15.00 a S/ 25.00',
-  },
-  {
-    id: 'suri',
-    nombre: 'Suri a la Brasa',
-    icono: 'bonfire-outline',
-    queEs: 'Larva comestible del escarabajo que se cría dentro del tronco del aguaje caído. Es rica en aceites naturales y proteínas.',
-    comoComer: 'Se asa en brochetas sobre carbón con un toque de sal. La textura exterior es crocante y por dentro suave, similar al chicharrón de pollo.',
-    audacia: 'Extrema (Reto para aventureros)',
-    precioAprox: 'S/ 5.00 a S/ 8.00 la brocheta',
-  },
-  {
-    id: 'camucamu',
-    nombre: 'Camu Camu & Aguaje',
-    icono: 'cafe-outline',
-    queEs: 'Frutas emblemáticas. El camu camu tiene 40 veces más vitamina C que la naranja; el aguaje es un fruto carnoso de palmera repleto de betacarotenos.',
-    comoComer: 'En jugos helados, raspadillas o chupetes artesanales para hidratarse en las tardes.',
-    audacia: 'Fácil (100% refrescante)',
-    precioAprox: 'S/ 3.00 a S/ 6.00 el vaso helado',
-  },
+  { id: 'juane', icono: 'leaf-outline' },
+  { id: 'tacacho', icono: 'flame-outline' },
+  { id: 'paiche', icono: 'fish-outline' },
+  { id: 'patarashca', icono: 'leaf-outline' },
+  { id: 'chonta', icono: 'nutrition-outline' },
+  { id: 'suri', icono: 'bonfire-outline' },
+  { id: 'camucamu', icono: 'cafe-outline' },
+];
+
+const NIVELES = [
+  { key: 'todos', icon: 'restaurant-outline' },
+  { key: 'alta', icon: 'diamond-outline' },
+  { key: 'intermedio', icon: 'boat-outline' },
+  { key: 'popular', icon: 'storefront-outline' },
 ];
 
 export default function GastronomiaScreen() {
+  const { t } = useTranslation();
+  const tp = usePuntoTexto();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(crearEstilos);
   const puntos = obtenerPuntos();
   const gastronomicos = puntos.filter((p) => p.categoria === 'gastronomico');
 
@@ -96,13 +46,6 @@ export default function GastronomiaScreen() {
   const [puntoSeleccionado, setPuntoSeleccionado] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
-
-  const niveles = [
-    { key: 'todos', label: 'Todos los Niveles', icon: 'restaurant-outline' },
-    { key: 'alta', label: 'Alta Gama / Gourmet', icon: 'diamond-outline' },
-    { key: 'intermedio', label: 'Terrazas & Río', icon: 'boat-outline' },
-    { key: 'popular', label: 'Popular Vivencial', icon: 'storefront-outline' },
-  ];
 
   const filtrados = gastronomicos.filter((p) => {
     if (nivelSeleccionado === 'todos') return true;
@@ -121,7 +64,7 @@ export default function GastronomiaScreen() {
     <View style={styles.contenedor}>
       {/* Header con botón Drawer */}
       <View style={styles.header}>
-        <ScreenHeader embedded title="Gastronomía" subtitle="Dónde comer en Iquitos" onMenu={() => setDrawerVisible(true)} />
+        <ScreenHeader embedded title={t('gastro.titulo')} subtitle={t('gastro.subtitulo')} onMenu={() => setDrawerVisible(true)} />
 
         {/* Selector de Pestaña Principal: Lugares vs Diccionario */}
         <View style={styles.tabSelector}>
@@ -129,14 +72,14 @@ export default function GastronomiaScreen() {
             onPress={() => setVistaActual('lugares')}
             style={[styles.tabBtn, vistaActual === 'lugares' && styles.tabBtnActivo]}
           >
-            <Text style={[styles.tabBtnTexto, vistaActual === 'lugares' && styles.tabBtnTextoActivo]}>Dónde comer
+            <Text style={[styles.tabBtnTexto, vistaActual === 'lugares' && styles.tabBtnTextoActivo]}>{t('gastro.tab_lugares')}
             </Text>
           </Pressable>
           <Pressable
             onPress={() => setVistaActual('diccionario')}
             style={[styles.tabBtn, vistaActual === 'diccionario' && styles.tabBtnActivo]}
           >
-            <Text style={[styles.tabBtnTexto, vistaActual === 'diccionario' && styles.tabBtnTextoActivo]}>Platos típicos
+            <Text style={[styles.tabBtnTexto, vistaActual === 'diccionario' && styles.tabBtnTextoActivo]}>{t('gastro.tab_platos')}
             </Text>
           </Pressable>
         </View>
@@ -151,7 +94,7 @@ export default function GastronomiaScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ paddingHorizontal: 16, alignItems: 'center' }}
             >
-              {niveles.map((n) => {
+              {NIVELES.map((n) => {
                 const act = nivelSeleccionado === n.key;
                 return (
                   <Pressable
@@ -161,7 +104,7 @@ export default function GastronomiaScreen() {
                   >
                     <Icon name={n.icon} size={16} color={act ? colors.onPrimary : colors.textMuted} />
                     <Text style={[styles.nivelTexto, act && styles.nivelTextoActivo]}>
-                      {n.label}
+                      {t(`gastro.nivel_${n.key}`)}
                     </Text>
                   </Pressable>
                 );
@@ -183,19 +126,19 @@ export default function GastronomiaScreen() {
               >
                 <View style={styles.cardHeader}>
                   <View style={styles.badgeNivel}>
-                    <Text style={styles.badgeNivelTexto}>{item.subcategoria}</Text>
+                    <Text style={styles.badgeNivelTexto}>{tp(item, 'subcategoria')}</Text>
                   </View>
                   <Text style={styles.ratingText}>{item.rating || 4.8}</Text>
                 </View>
 
-                <Text style={styles.cardTitulo}>{item.nombre}</Text>
-                <Text style={styles.cardDesc}>{item.descripcionCorta}</Text>
+                <Text style={styles.cardTitulo}>{tp(item, 'nombre')}</Text>
+                <Text style={styles.cardDesc}>{tp(item, 'descripcionCorta')}</Text>
 
                 <View style={styles.divider} />
 
                 <View style={styles.cardFooter}>
-                  <Text style={styles.cardCosto}>{item.costo}</Text>
-                  <Text style={styles.btnVer}>Ver platos y audio →</Text>
+                  <Text style={styles.cardCosto}>{tp(item, 'costo')}</Text>
+                  <Text style={styles.btnVer}>{t('gastro.ver_platos_audio')}</Text>
                 </View>
               </Pressable>
             ))}
@@ -209,9 +152,9 @@ export default function GastronomiaScreen() {
           showsVerticalScrollIndicator={true}
         >
           <View style={styles.introDiccionario}>
-            <Text style={styles.introTitulo}>Atrévete a probar la Amazonía</Text>
+            <Text style={styles.introTitulo}>{t('gastro.intro_titulo')}</Text>
             <Text style={styles.introSub}>
-              Guía táctica para saber qué ordenar en el mercado o restaurante sin sorpresas.
+              {t('gastro.intro_sub')}
             </Text>
           </View>
 
@@ -220,19 +163,19 @@ export default function GastronomiaScreen() {
               <View style={styles.platoTop}>
                 <View style={styles.platoIcono}><Icon name={plato.icono} size={22} color={colors.accent} /></View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
-                  <Text style={styles.platoTitulo}>{plato.nombre}</Text>
-                  <Text style={styles.platoAudacia}>Audacia: {plato.audacia}</Text>
+                  <Text style={styles.platoTitulo}>{t(`gastro.platos.${plato.id}.nombre`)}</Text>
+                  <Text style={styles.platoAudacia}>{t('gastro.audacia', { nivel: t(`gastro.platos.${plato.id}.audacia`) })}</Text>
                 </View>
               </View>
 
-              <Text style={styles.platoQueEs}>{plato.queEs}</Text>
+              <Text style={styles.platoQueEs}>{t(`gastro.platos.${plato.id}.queEs`)}</Text>
 
               <View style={styles.tipPlato}>
-                <Text style={styles.tipPlatoLabel}>Cómo se disfruta:</Text>
-                <Text style={styles.tipPlatoTexto}>{plato.comoComer}</Text>
+                <Text style={styles.tipPlatoLabel}>{t('gastro.como_se_disfruta')}</Text>
+                <Text style={styles.tipPlatoTexto}>{t(`gastro.platos.${plato.id}.comoComer`)}</Text>
               </View>
 
-              <Text style={styles.platoPrecio}>Precio aprox: {plato.precioAprox}</Text>
+              <Text style={styles.platoPrecio}>{t('gastro.precio_aprox', { precio: t(`gastro.platos.${plato.id}.precioAprox`) })}</Text>
             </View>
           ))}
         </ScrollView>
@@ -255,10 +198,10 @@ export default function GastronomiaScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const crearEstilos = (colors) => StyleSheet.create({
   contenedor: {
     flex: 1,
-    backgroundColor: CREMA,
+    backgroundColor: colors.bg,
   },
   header: {
     backgroundColor: colors.bg,
@@ -268,21 +211,21 @@ const styles = StyleSheet.create({
   btnMenu: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: colors.surfaceMuted,
   },
   btnMenuTexto: {
     fontSize: 20,
-    color: BLANCO,
+    color: colors.text,
     fontWeight: '700',
   },
   headerTitulo: {
     fontSize: 20,
     fontWeight: '700',
-    color: BLANCO,
+    color: colors.text,
   },
   headerSub: {
     fontSize: 12,
-    color: '#A7F3D0',
+    color: colors.textMuted,
     marginTop: 2,
   },
   tabSelector: {
@@ -299,7 +242,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   tabBtnActivo: {
-    backgroundColor: BLANCO,
+    backgroundColor: colors.surface,
   },
   tabBtnTexto: {
     fontSize: 12,
@@ -307,12 +250,12 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   tabBtnTextoActivo: {
-    color: VERDE_N,
+    color: colors.primary,
     fontWeight: '700',
   },
   nivelesContainer: {
     height: 52,
-    backgroundColor: BLANCO,
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     justifyContent: 'center',
@@ -328,7 +271,7 @@ const styles = StyleSheet.create({
     height: 36,
   },
   nivelChipActivo: {
-    backgroundColor: VERDE_B,
+    backgroundColor: colors.primary,
   },
   nivelIcon: {
     marginRight: 6,
@@ -336,16 +279,16 @@ const styles = StyleSheet.create({
   nivelTexto: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#475569',
+    color: colors.textMuted,
   },
   nivelTextoActivo: {
-    color: BLANCO,
+    color: colors.onPrimary,
   },
   scroll: {
     flex: 1,
   },
   card: {
-    backgroundColor: BLANCO,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     marginBottom: 14,
@@ -362,7 +305,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   badgeNivel: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: colors.accentSoft,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -370,7 +313,7 @@ const styles = StyleSheet.create({
   badgeNivelTexto: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#92400E',
+    color: colors.accent,
   },
   ratingText: {
     fontSize: 13,
@@ -380,12 +323,12 @@ const styles = StyleSheet.create({
   cardTitulo: {
     fontSize: 17,
     fontWeight: '700',
-    color: TINTA,
+    color: colors.text,
     marginTop: 8,
   },
   cardDesc: {
     fontSize: 13,
-    color: GRIS,
+    color: colors.textMuted,
     marginTop: 4,
     lineHeight: 18,
   },
@@ -402,12 +345,12 @@ const styles = StyleSheet.create({
   cardCosto: {
     fontSize: 12,
     fontWeight: '700',
-    color: VERDE_N,
+    color: colors.primary,
   },
   btnVer: {
     fontSize: 12,
     fontWeight: '700',
-    color: VERDE_B,
+    color: colors.primary,
   },
 
   // Estilos del Diccionario
@@ -417,20 +360,20 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 14,
     borderLeftWidth: 4,
-    borderLeftColor: VERDE_B,
+    borderLeftColor: colors.primary,
   },
   introTitulo: {
     fontSize: 14,
     fontWeight: '700',
-    color: VERDE_N,
+    color: colors.primary,
   },
   introSub: {
     fontSize: 12,
-    color: '#065F46',
+    color: colors.textMuted,
     marginTop: 2,
   },
   cardPlato: {
-    backgroundColor: BLANCO,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     marginBottom: 14,
@@ -457,17 +400,17 @@ const styles = StyleSheet.create({
   platoTitulo: {
     fontSize: 16,
     fontWeight: '700',
-    color: TINTA,
+    color: colors.text,
   },
   platoAudacia: {
     fontSize: 11,
-    color: '#0284C7',
+    color: colors.accent,
     fontWeight: '700',
     marginTop: 2,
   },
   platoQueEs: {
     fontSize: 13,
-    color: '#334155',
+    color: colors.text,
     lineHeight: 19,
     marginBottom: 8,
   },
@@ -482,7 +425,7 @@ const styles = StyleSheet.create({
   tipPlatoLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#475569',
+    color: colors.textMuted,
     marginBottom: 2,
   },
   tipPlatoTexto: {
@@ -493,6 +436,6 @@ const styles = StyleSheet.create({
   platoPrecio: {
     fontSize: 12,
     fontWeight: '700',
-    color: VERDE_N,
+    color: colors.primary,
   },
 });

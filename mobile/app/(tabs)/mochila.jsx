@@ -12,31 +12,29 @@ import { useSQLiteContext } from 'expo-sqlite';
 import DrawerMenuModal from '../../src/components/DrawerMenuModal';
 import ScreenHeader from '../../src/components/ScreenHeader';
 import Icon from '../../src/components/Icon';
-import { colors, space, radius, shadow } from '../../src/theme';
+import { useTranslation } from 'react-i18next';
+import { useTheme, useThemedStyles } from '../../src/context/ThemeContext';
 
-const VERDE = colors.primary;
-const VERDE_CLARO = colors.primary;
-const CREMA = colors.bg;
-const BLANCO = colors.surface;
-const TINTA = colors.text;
-const GRIS = colors.textMuted;
-const LINEA = colors.border;
+// Textos en mochila.zonas.<id>.* y mochila.retos.<id>.*
 
 const ZONAS = [
-  { id: 'centro', nombre: 'Iquitos Centro & Malecón', desc: 'Belén, Casonas del Caucho, Malecón Tarapacá', tam: '18 MB', paquetes: 4 },
-  { id: 'nanay', nombre: 'Ruta Fluvial Nanay & Momón', desc: 'Bellavista Nanay, Serpentario y Padre Cocha', tam: '34 MB', paquetes: 3 },
-  { id: 'allpahuayo', nombre: 'Reserva Allpahuayo-Mishana & Nauta', desc: 'Bosque blanco, varillales y Quistococha', tam: '27 MB', paquetes: 3 },
+  { id: 'centro', tam: '18 MB', paquetes: 4 },
+  { id: 'nanay', tam: '34 MB', paquetes: 3 },
+  { id: 'allpahuayo', tam: '27 MB', paquetes: 3 },
 ];
 
 const RETOS_PASAPORTE = [
-  { id: 'suri', titulo: 'Comer un suri asado', desc: 'En Bellavista Nanay o Mercado de Belén', icono: 'bonfire-outline' },
-  { id: 'peke', titulo: 'Navegar en peke-peke', desc: 'Surcar el Nanay o el Itaya en bote tradicional', icono: 'boat-outline' },
-  { id: 'juane', titulo: 'Desatar un juane en bijao', desc: 'Tradición gastronómica amazónica con ají de cocona', icono: 'leaf-outline' },
-  { id: 'manati', titulo: 'Visitar los manatíes en el CREA', desc: 'Conocer el centro de rescate de fauna silvestre', icono: 'water-outline' },
-  { id: 'tarantula', titulo: 'Expedición nocturna en la selva', desc: 'Avistamiento de fauna con linternas de campo', icono: 'moon-outline' },
+  { id: 'suri', icono: 'bonfire-outline' },
+  { id: 'peke', icono: 'boat-outline' },
+  { id: 'juane', icono: 'leaf-outline' },
+  { id: 'manati', icono: 'water-outline' },
+  { id: 'tarantula', icono: 'moon-outline' },
 ];
 
 export default function MochilaScreen() {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(crearEstilos);
   const db = useSQLiteContext();
   const [descargadas, setDescargadas] = useState({ centro: true });
   const [retosCompletados, setRetosCompletados] = useState({ juane: true });
@@ -46,7 +44,7 @@ export default function MochilaScreen() {
     const nuevo = { ...descargadas, [id]: valor };
     setDescargadas(nuevo);
     if (valor) {
-      Alert.alert('Descarga completada', `La zona "${id}" ha sido guardada en SQLite para uso sin señal.`);
+      Alert.alert(t('mochila.descarga_titulo'), t('mochila.descarga_msg', { zona: t(`mochila.zonas.${id}.nombre`) }));
     }
   };
 
@@ -57,31 +55,31 @@ export default function MochilaScreen() {
 
   const limpiarCache = () => {
     setDescargadas({});
-    Alert.alert('Caché liberada', 'Se ha limpiado el almacenamiento local offline.');
+    Alert.alert(t('mochila.cache_titulo'), t('mochila.cache_msg'));
   };
 
   const progreso = (Object.values(descargadas).filter(Boolean).length / ZONAS.length) * 100;
   const progresoRetos = Object.values(retosCompletados).filter(Boolean).length;
 
   return (
-    <View style={{ flex: 1, backgroundColor: CREMA }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Header */}
         <View style={styles.header}>
-          <ScreenHeader embedded title="Mochila" subtitle="Contenido sin conexión y tu progreso" onMenu={() => setDrawerVisible(true)} />
+          <ScreenHeader embedded title={t('mochila.titulo')} subtitle={t('mochila.subtitulo')} onMenu={() => setDrawerVisible(true)} />
         </View>
 
         {/* TARJETA 1: ESTADO DEL ALMACENAMIENTO OFFLINE */}
         <View style={styles.tarjeta}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.tarjetaTitulo}>Almacenamiento Offline en SQLite</Text>
+              <Text style={styles.tarjetaTitulo}>{t('mochila.almacenamiento_titulo')}</Text>
               <Text style={styles.tarjetaDesc}>
-                {Object.values(descargadas).filter(Boolean).length} de {ZONAS.length} zonas listas sin señal
+                {t('mochila.zonas_listas', { listas: Object.values(descargadas).filter(Boolean).length, total: ZONAS.length })}
               </Text>
             </View>
             <Pressable onPress={limpiarCache} style={styles.btnLimpiar}>
-              <Text style={styles.btnLimpiarTexto}>Liberar</Text>
+              <Text style={styles.btnLimpiarTexto}>{t('mochila.liberar')}</Text>
             </Pressable>
           </View>
           <View style={styles.barraFondo}>
@@ -90,23 +88,23 @@ export default function MochilaScreen() {
         </View>
 
         {/* SECCIÓN ZONAS DESCARGABLES */}
-        <Text style={styles.seccionTitulo}>Paquetes de Mapas y Rutas</Text>
+        <Text style={styles.seccionTitulo}>{t('mochila.paquetes_titulo')}</Text>
         {ZONAS.map((z) => {
           const act = !!descargadas[z.id];
           return (
             <View key={z.id} style={styles.tarjetaZona}>
               <View style={{ flex: 1, paddingRight: 10 }}>
-                <Text style={styles.zonaNombre}>{z.nombre}</Text>
-                <Text style={styles.zonaDesc}>{z.desc}</Text>
+                <Text style={styles.zonaNombre}>{t(`mochila.zonas.${z.id}.nombre`)}</Text>
+                <Text style={styles.zonaDesc}>{t(`mochila.zonas.${z.id}.desc`)}</Text>
                 <Text style={styles.zonaTam}>
-                   {z.tam} • {z.paquetes} circuitos con GPS
+                   {t('mochila.tam_circuitos', { tam: z.tam, n: z.paquetes })}
                 </Text>
               </View>
               <Switch
                 value={act}
                 onValueChange={(v) => alternarDescarga(z.id, v)}
-                trackColor={{ false: '#CBD5E1', true: VERDE_CLARO }}
-                thumbColor={act ? VERDE : '#FFFFFF'}
+                trackColor={{ false: colors.border, true: colors.primary }}
+                thumbColor={act ? colors.primary : colors.surface}
               />
             </View>
           );
@@ -114,10 +112,10 @@ export default function MochilaScreen() {
 
         {/* TARJETA 2: PASAPORTE SELVA GUÍA (GAMIFICACIÓN) */}
         <Text style={[styles.seccionTitulo, { marginTop: 22 }]}>
-           Pasaporte Amazónico ({progresoRetos}/{RETOS_PASAPORTE.length} Retos)
+           {t('mochila.pasaporte_titulo', { hechos: progresoRetos, total: RETOS_PASAPORTE.length })}
         </Text>
         <Text style={styles.seccionNota}>
-          Marca cada experiencia vivida para ganar tus sellos de explorador:
+          {t('mochila.pasaporte_nota')}
         </Text>
 
         <View style={styles.tarjeta}>
@@ -132,12 +130,12 @@ export default function MochilaScreen() {
                 <View style={styles.retoIcono}><Icon name={reto.icono} size={20} color={colors.primary} /></View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <Text style={[styles.retoTitulo, completado && styles.retoCompletado]}>
-                    {reto.titulo}
+                    {t(`mochila.retos.${reto.id}.titulo`)}
                   </Text>
-                  <Text style={styles.retoDesc}>{reto.desc}</Text>
+                  <Text style={styles.retoDesc}>{t(`mochila.retos.${reto.id}.desc`)}</Text>
                 </View>
                 <View style={[styles.checkCircle, completado && styles.checkCircleActivo]}>
-                  <Text style={{ color: completado ? BLANCO : colors.textSubtle, fontWeight: '700', fontSize: 12 }}>
+                  <Text style={{ color: completado ? colors.onPrimary : colors.textSubtle, fontWeight: '700', fontSize: 12 }}>
                     {completado ? '' : '○'}
                   </Text>
                 </View>
@@ -148,10 +146,9 @@ export default function MochilaScreen() {
 
         {/* TIP DE CONEXIÓN */}
         <View style={styles.tipBox}>
-          <Text style={styles.tipTitulo}>Modo Avión Activado:</Text>
+          <Text style={styles.tipTitulo}>{t('mochila.tip_titulo')}</Text>
           <Text style={styles.tipTexto}>
-            Los mapas descargados y los audios funcionarán incluso si navegas en medio del río
-            Amazonas sin ningún chip o señal telefónica.
+            {t('mochila.tip_texto')}
           </Text>
         </View>
       </ScrollView>
@@ -166,7 +163,7 @@ export default function MochilaScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const crearEstilos = (colors) => StyleSheet.create({
   header: {
     backgroundColor: colors.bg,
     paddingHorizontal: 16,
@@ -175,31 +172,31 @@ const styles = StyleSheet.create({
   btnMenu: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: colors.surfaceMuted,
   },
   btnMenuTexto: {
     fontSize: 20,
-    color: BLANCO,
+    color: colors.text,
     fontWeight: '700',
   },
   headerTitulo: {
     fontSize: 18,
     fontWeight: '700',
-    color: BLANCO,
+    color: colors.text,
   },
   headerSub: {
     fontSize: 12,
-    color: '#A8E6D9',
+    color: colors.textMuted,
     marginTop: 2,
   },
   tarjeta: {
-    backgroundColor: BLANCO,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     marginHorizontal: 16,
     marginTop: 12,
     borderWidth: 1,
-    borderColor: LINEA,
+    borderColor: colors.border,
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 6,
@@ -208,21 +205,21 @@ const styles = StyleSheet.create({
   tarjetaTitulo: {
     fontSize: 14,
     fontWeight: '700',
-    color: TINTA,
+    color: colors.text,
   },
   tarjetaDesc: {
     fontSize: 12,
-    color: GRIS,
+    color: colors.textMuted,
     marginTop: 2,
   },
   btnLimpiar: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: colors.dangerSoft,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
   },
   btnLimpiarTexto: {
-    color: '#DC2626',
+    color: colors.danger,
     fontSize: 11,
     fontWeight: '700',
   },
@@ -234,47 +231,47 @@ const styles = StyleSheet.create({
   },
   barraProgreso: {
     height: 6,
-    backgroundColor: VERDE_CLARO,
+    backgroundColor: colors.primary,
     borderRadius: 3,
   },
   seccionTitulo: {
     fontSize: 14,
     fontWeight: '700',
-    color: TINTA,
+    color: colors.text,
     marginHorizontal: 16,
     marginTop: 18,
     marginBottom: 4,
   },
   seccionNota: {
     fontSize: 12,
-    color: GRIS,
+    color: colors.textMuted,
     marginHorizontal: 16,
     marginBottom: 8,
   },
   tarjetaZona: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: BLANCO,
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 14,
     marginHorizontal: 16,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: LINEA,
+    borderColor: colors.border,
   },
   zonaNombre: {
     fontSize: 14,
     fontWeight: '700',
-    color: TINTA,
+    color: colors.text,
   },
   zonaDesc: {
     fontSize: 11,
-    color: GRIS,
+    color: colors.textMuted,
     marginTop: 2,
   },
   zonaTam: {
     fontSize: 11,
-    color: VERDE,
+    color: colors.primary,
     fontWeight: '600',
     marginTop: 4,
   },
@@ -298,7 +295,7 @@ const styles = StyleSheet.create({
   retoTitulo: {
     fontSize: 13,
     fontWeight: '700',
-    color: TINTA,
+    color: colors.text,
   },
   retoCompletado: {
     textDecorationLine: 'line-through',
@@ -306,7 +303,7 @@ const styles = StyleSheet.create({
   },
   retoDesc: {
     fontSize: 11,
-    color: GRIS,
+    color: colors.textMuted,
     marginTop: 1,
   },
   checkCircle: {
@@ -314,13 +311,13 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkCircleActivo: {
-    backgroundColor: VERDE,
-    borderColor: VERDE,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   tipBox: {
     backgroundColor: colors.primarySoft,
@@ -329,17 +326,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     borderLeftWidth: 4,
-    borderLeftColor: VERDE,
+    borderLeftColor: colors.primary,
   },
   tipTitulo: {
     fontSize: 12,
     fontWeight: '700',
-    color: VERDE,
+    color: colors.primary,
     marginBottom: 2,
   },
   tipTexto: {
     fontSize: 11,
-    color: '#065F46',
+    color: colors.textMuted,
     lineHeight: 16,
   },
 });

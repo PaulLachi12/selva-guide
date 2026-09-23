@@ -13,17 +13,16 @@ import { agregarPunto } from '../../src/data/puntosData';
 import DrawerMenuModal from '../../src/components/DrawerMenuModal';
 import ScreenHeader from '../../src/components/ScreenHeader';
 import Icon from '../../src/components/Icon';
-import { colors, space, radius, shadow } from '../../src/theme';
+import { useTranslation } from 'react-i18next';
+import { useTheme, useThemedStyles } from '../../src/context/ThemeContext';
 
-const VERDE_N = colors.primary;
-const VERDE_B = colors.primary;
-const BLANCO = colors.surface;
-const TINTA = colors.text;
-const GRIS = colors.textMuted;
-const LINEA = colors.border;
+const CATEGORIAS = ['turistico', 'gastronomico', 'deportivo', 'recreativo'];
 
 export default function NuevoPuntoScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(crearEstilos);
 
   const [nombre, setNombre] = useState('');
   const [categoria, setCategoria] = useState('turistico');
@@ -41,22 +40,17 @@ export default function NuevoPuntoScreen() {
   const [fotosSimuladas, setFotosSimuladas] = useState(['iquitos_foto_1.jpg', 'iquitos_foto_2.jpg']);
   const [drawerVisible, setDrawerVisible] = useState(false);
 
-  const categorias = [
-    { key: 'turistico', label: 'Turístico' },
-    { key: 'gastronomico', label: 'Gastronómico' },
-    { key: 'deportivo', label: 'Deportivo/Extremo' },
-    { key: 'recreativo', label: 'Recreativo/Familiar' },
-  ];
+  const categorias = CATEGORIAS.map((key) => ({ key, label: t(`admin.cat_${key}`) }));
 
   const guardarDestino = () => {
     if (!nombre.trim()) {
-      Alert.alert('Faltan Datos', 'El nombre del lugar es obligatorio.');
+      Alert.alert(t('admin.faltan_datos'), t('admin.nombre_obligatorio'));
       return;
     }
     const latNum = parseFloat(lat);
     const lngNum = parseFloat(lng);
     if (isNaN(latNum) || isNaN(lngNum)) {
-      Alert.alert('Coordenadas Inválidas', 'Ingresa valores numéricos para Latitud y Longitud.');
+      Alert.alert(t('admin.coords_invalidas'), t('admin.coords_invalidas_msg'));
       return;
     }
 
@@ -84,15 +78,15 @@ export default function NuevoPuntoScreen() {
     agregarPunto(nuevo);
 
     Alert.alert(
-      '¡Destino Publicado!',
-      `"${nombre}" ha sido añadido al mapa y a las guías de la aplicación.`,
+      t('admin.publicado'),
+      t('admin.publicado_msg', { nombre }),
       [
         {
-          text: 'Ir al Mapa',
+          text: t('admin.ir_mapa'),
           onPress: () => router.push('/(tabs)'),
         },
         {
-          text: 'Agregar Otro',
+          text: t('admin.agregar_otro'),
           onPress: () => {
             setNombre('');
             setSubcategoria('');
@@ -112,32 +106,32 @@ export default function NuevoPuntoScreen() {
   const agregarFotoSimulada = () => {
     const num = fotosSimuladas.length + 1;
     setFotosSimuladas([...fotosSimuladas, `selva_foto_${num}.jpg`]);
-    Alert.alert('Foto simulada', `Se adjuntó "selva_foto_${num}.jpg" desde la galería.`);
+    Alert.alert(t('admin.foto_simulada'), t('admin.foto_adjuntada', { archivo: `selva_foto_${num}.jpg` }));
   };
 
   return (
     <View style={styles.contenedor}>
       {/* Header con botón Drawer y Volver */}
       <View style={styles.header}>
-        <ScreenHeader embedded title="Agregar lugar" subtitle="Publica un punto turístico o gastronómico" onMenu={() => setDrawerVisible(true)} />
+        <ScreenHeader embedded title={t('admin.titulo')} subtitle={t('admin.subtitulo')} onMenu={() => setDrawerVisible(true)} />
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
         <View style={styles.card}>
-          <Text style={styles.cardTitulo}>Formulario de Registro</Text>
+          <Text style={styles.cardTitulo}>{t('admin.formulario')}</Text>
 
           {/* Nombre */}
-          <Text style={styles.label}>Nombre del Lugar *</Text>
+          <Text style={styles.label}>{t('admin.nombre')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ej: Mirador de Bellavista Nanay"
-            placeholderTextColor="#94A3B8"
+            placeholder={t('admin.ph_nombre')}
+            placeholderTextColor={colors.textSubtle}
             value={nombre}
             onChangeText={setNombre}
           />
 
           {/* Categoría Selector */}
-          <Text style={styles.label}>Categoría Principal *</Text>
+          <Text style={styles.label}>{t('admin.categoria')}</Text>
           <View style={styles.catRow}>
             {categorias.map((c) => {
               const act = categoria === c.key;
@@ -156,23 +150,23 @@ export default function NuevoPuntoScreen() {
           </View>
 
           {/* Subcategoría / Nivel de Precio */}
-          <Text style={styles.label}>Subcategoría / Nivel de Precio</Text>
+          <Text style={styles.label}>{t('admin.subcategoria')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ej: Alta Gama / Intermedio / Popular Vivencial"
-            placeholderTextColor="#94A3B8"
+            placeholder={t('admin.ph_subcategoria')}
+            placeholderTextColor={colors.textSubtle}
             value={subcategoria}
             onChangeText={setSubcategoria}
           />
 
           {/* Coordenadas */}
-          <Text style={styles.label}>Coordenadas GPS (Latitud / Longitud) *</Text>
+          <Text style={styles.label}>{t('admin.coordenadas')}</Text>
           <View style={styles.coordsRow}>
             <View style={{ flex: 1, marginRight: 8 }}>
               <TextInput
                 style={styles.input}
-                placeholder="Lat: -3.749"
-                placeholderTextColor="#94A3B8"
+                placeholder={t('admin.ph_lat')}
+                placeholderTextColor={colors.textSubtle}
                 keyboardType="numeric"
                 value={lat}
                 onChangeText={setLat}
@@ -181,8 +175,8 @@ export default function NuevoPuntoScreen() {
             <View style={{ flex: 1 }}>
               <TextInput
                 style={styles.input}
-                placeholder="Lng: -73.244"
-                placeholderTextColor="#94A3B8"
+                placeholder={t('admin.ph_lng')}
+                placeholderTextColor={colors.textSubtle}
                 keyboardType="numeric"
                 value={lng}
                 onChangeText={setLng}
@@ -193,21 +187,21 @@ export default function NuevoPuntoScreen() {
           {/* Tarifa y Dificultad */}
           <View style={styles.coordsRow}>
             <View style={{ flex: 1, marginRight: 8 }}>
-              <Text style={styles.label}>Costo / Tarifa</Text>
+              <Text style={styles.label}>{t('admin.costo')}</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Ej: S/ 15 entrada"
-                placeholderTextColor="#94A3B8"
+                placeholder={t('admin.ph_costo')}
+                placeholderTextColor={colors.textSubtle}
                 value={costo}
                 onChangeText={setCosto}
               />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.label}>Dificultad</Text>
+              <Text style={styles.label}>{t('admin.dificultad')}</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Ej: Fácil / Media"
-                placeholderTextColor="#94A3B8"
+                placeholder={t('admin.ph_dificultad')}
+                placeholderTextColor={colors.textSubtle}
                 value={dificultad}
                 onChangeText={setDificultad}
               />
@@ -215,40 +209,40 @@ export default function NuevoPuntoScreen() {
           </View>
 
           {/* Cómo llegar y Distancia */}
-          <Text style={styles.label}>Cómo llegar (Medio de transporte)</Text>
+          <Text style={styles.label}>{t('admin.acceso')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ej: Mototaxi S/ 5 o peke-peke desde el puerto"
-            placeholderTextColor="#94A3B8"
+            placeholder={t('admin.ph_acceso')}
+            placeholderTextColor={colors.textSubtle}
             value={acceso}
             onChangeText={setAcceso}
           />
 
-          <Text style={styles.label}>Distancia referencial</Text>
+          <Text style={styles.label}>{t('admin.distancia')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ej: 14 km Carretera Iquitos-Nauta"
-            placeholderTextColor="#94A3B8"
+            placeholder={t('admin.ph_distancia')}
+            placeholderTextColor={colors.textSubtle}
             value={distancia}
             onChangeText={setDistancia}
           />
 
           {/* Descripción Corta */}
-          <Text style={styles.label}>Descripción Corta (Para vista rápida) *</Text>
+          <Text style={styles.label}>{t('admin.desc_corta')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Resumen atractivo de 1 o 2 líneas..."
-            placeholderTextColor="#94A3B8"
+            placeholder={t('admin.ph_desc_corta')}
+            placeholderTextColor={colors.textSubtle}
             value={descripcionCorta}
             onChangeText={setDescripcionCorta}
           />
 
           {/* Descripción Detallada */}
-          <Text style={styles.label}>Descripción Detallada / Historia</Text>
+          <Text style={styles.label}>{t('admin.desc_larga')}</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
-            placeholder="Historia completa, biodiversidad, platos recomendados..."
-            placeholderTextColor="#94A3B8"
+            placeholder={t('admin.ph_desc_larga')}
+            placeholderTextColor={colors.textSubtle}
             multiline
             numberOfLines={4}
             value={descripcionLarga}
@@ -256,11 +250,11 @@ export default function NuevoPuntoScreen() {
           />
 
           {/* Recomendaciones de Visita */}
-          <Text style={styles.label}>Recomendaciones de Visita / Equipamiento</Text>
+          <Text style={styles.label}>{t('admin.recomendaciones')}</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
-            placeholder="Ej: Llevar botas impermeables, repelente, efectivo..."
-            placeholderTextColor="#94A3B8"
+            placeholder={t('admin.ph_recomendaciones')}
+            placeholderTextColor={colors.textSubtle}
             multiline
             numberOfLines={3}
             value={recomendaciones}
@@ -268,18 +262,18 @@ export default function NuevoPuntoScreen() {
           />
 
           {/* Teléfono / WhatsApp */}
-          <Text style={styles.label}>Teléfono / WhatsApp de Contacto</Text>
+          <Text style={styles.label}>{t('admin.telefono')}</Text>
           <TextInput
             style={styles.input}
             placeholder="+51 965 842 100"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={colors.textSubtle}
             keyboardType="phone-pad"
             value={telefono}
             onChangeText={setTelefono}
           />
 
           {/* Galería de Fotos Simulada */}
-          <Text style={styles.label}>Galería de Fotos del Destino</Text>
+          <Text style={styles.label}>{t('admin.galeria')}</Text>
           <View style={styles.galeriaBox}>
             {fotosSimuladas.map((f, i) => (
               <View key={i} style={styles.fotoChip}>
@@ -287,13 +281,13 @@ export default function NuevoPuntoScreen() {
               </View>
             ))}
             <Pressable onPress={agregarFotoSimulada} style={styles.btnAgregarFoto}>
-              <Text style={styles.btnAgregarFotoTexto}>+ Subir Foto</Text>
+              <Text style={styles.btnAgregarFotoTexto}>{t('admin.subir_foto')}</Text>
             </Pressable>
           </View>
 
           {/* Botón de Guardado */}
           <Pressable onPress={guardarDestino} style={styles.btnGuardar}>
-            <Text style={styles.btnGuardarTexto}>Guardar y Publicar en el Mapa</Text>
+            <Text style={styles.btnGuardarTexto}>{t('admin.guardar_publicar')}</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -308,52 +302,12 @@ export default function NuevoPuntoScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  contenedor: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
-  header: {
-    backgroundColor: colors.bg,
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  btnMenu: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-  },
-  btnMenuTexto: {
-    fontSize: 20,
-    color: BLANCO,
-    fontWeight: '700',
-  },
-  btnVolver: {
-    backgroundColor: VERDE_B,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  btnVolverTexto: {
-    color: BLANCO,
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  headerTitulo: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: BLANCO,
-  },
-  headerSub: {
-    fontSize: 11,
-    color: colors.textSubtle,
-    marginTop: 2,
-  },
-  scroll: {
-    flex: 1,
-  },
+const crearEstilos = (colors) => StyleSheet.create({
+  contenedor: { flex: 1, backgroundColor: colors.bg },
+  header: { backgroundColor: colors.bg, paddingHorizontal: 16, paddingBottom: 8 },
+  scroll: { flex: 1 },
   card: {
-    backgroundColor: BLANCO,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 18,
     borderWidth: 1,
@@ -363,40 +317,20 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  cardTitulo: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: TINTA,
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#334155',
-    marginBottom: 6,
-    marginTop: 10,
-  },
+  cardTitulo: { fontSize: 17, fontWeight: '700', color: colors.text, marginBottom: 16 },
+  label: { fontSize: 12, fontWeight: '700', color: colors.text, marginBottom: 6, marginTop: 10 },
   input: {
     borderWidth: 1,
-    borderColor: LINEA,
+    borderColor: colors.border,
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 46,
     fontSize: 14,
-    color: TINTA,
-    backgroundColor: '#FFFFFF',
+    color: colors.text,
+    backgroundColor: colors.surface,
   },
-  textArea: {
-    height: 90,
-    textAlignVertical: 'top',
-    paddingTop: 10,
-  },
-  catRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 4,
-  },
+  textArea: { height: 90, textAlignVertical: 'top', paddingTop: 10 },
+  catRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
   btnCat: {
     paddingHorizontal: 12,
     paddingVertical: 7,
@@ -405,22 +339,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  btnCatActivo: {
-    backgroundColor: VERDE_B,
-    borderColor: VERDE_B,
-  },
-  btnCatTexto: {
-    fontSize: 12,
-    color: '#475569',
-    fontWeight: '600',
-  },
-  btnCatTextoActivo: {
-    color: BLANCO,
-    fontWeight: '700',
-  },
-  coordsRow: {
-    flexDirection: 'row',
-  },
+  btnCatActivo: { backgroundColor: colors.primary, borderColor: colors.primary },
+  btnCatTexto: { fontSize: 12, color: colors.textMuted, fontWeight: '600' },
+  btnCatTextoActivo: { color: colors.onPrimary, fontWeight: '700' },
+  coordsRow: { flexDirection: 'row' },
   galeriaBox: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -432,42 +354,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  fotoChip: {
-    backgroundColor: colors.border,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 6,
-  },
-  fotoChipTexto: {
-    fontSize: 11,
-    color: '#334155',
-    fontWeight: '600',
-  },
-  btnAgregarFoto: {
-    backgroundColor: '#E0F2FE',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  btnAgregarFotoTexto: {
-    fontSize: 11,
-    color: '#0284C7',
-    fontWeight: '700',
-  },
+  fotoChip: { backgroundColor: colors.border, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 6 },
+  fotoChipTexto: { fontSize: 11, color: colors.text, fontWeight: '600' },
+  btnAgregarFoto: { backgroundColor: colors.accentSoft, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
+  btnAgregarFotoTexto: { fontSize: 11, color: colors.accent, fontWeight: '700' },
   btnGuardar: {
-    backgroundColor: VERDE_N,
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 24,
-    shadowColor: VERDE_N,
-    shadowOpacity: 0.3,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 4,
   },
-  btnGuardarTexto: {
-    color: BLANCO,
-    fontSize: 15,
-    fontWeight: '700',
-  },
+  btnGuardarTexto: { color: colors.onPrimary, fontSize: 15, fontWeight: '700' },
 });

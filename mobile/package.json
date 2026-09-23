@@ -6,10 +6,14 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "check:i18n": "node scripts/check-i18n.js",
+    "check:bundle": "expo export --platform android --output-dir .expo/ci-export",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
+    "@types/react": "~19.2.4",
     "axios": "^1.20.0",
     "expo": "~57.0.24",
     "expo-blur": "~15.0.7",
@@ -30,7 +34,8 @@
     "react-native": "0.86.3",
     "react-native-maps": "1.27.2",
     "react-native-safe-area-context": "~5.7.0",
-    "react-native-screens": "~4.26.0"
+    "react-native-screens": "~4.26.0",
+    "typescript": "~6.0.3"
   },
   "private": true
 }

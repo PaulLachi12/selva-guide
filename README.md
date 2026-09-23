@@ -1,118 +1,82 @@
-# 🌿 SelvaGuide
+# SelvaGuide
 
-Plataforma web estilo **Uber de guías turísticos** para la Amazonía peruana. Conecta a turistas con guías locales certificados de Iquitos para tours de avistamiento, aventura, cultura y naturaleza.
+Guía turística móvil de Iquitos (Loreto, Perú). Acompaña al turista en todo su viaje: al llegar, al recorrer la ciudad, al ir a la selva y al volver. Funciona en 4 idiomas y está pensada para usarse sin señal.
 
-## Stack
+> **Resumen de 2 minutos:** [`docs/RESUMEN.md`](./docs/RESUMEN.md) · **Plan y épicas:** [issues](https://github.com/PaulLachi12/selva-guide/issues) · **Documentación:** [`docs/`](./docs/README.md)
 
-| Capa | Tecnología |
-|---|---|
-| Frontend | React 18 + Vite + Tailwind CSS + Leaflet (mapas) |
-| Backend | Node.js + Express + Socket.io |
-| Base de datos | PostgreSQL 17 + Sequelize ORM |
-| Tiempo real | Socket.io (tracking en vivo y chat) |
+## Arranque rápido
 
-## Requisitos
-
-- Node.js ≥ 18
-- PostgreSQL ≥ 13 corriendo en `127.0.0.1:5432`
-- Cambiar `DB_PASSWORD` en `backend/.env` por tu contraseña local
-
-## Inicio rápido
+### Backend (API, puerto 9000)
 
 ```bash
-# 1. Configurar backend
 cd backend
-cp .env.example .env        # ajustar DB_PASSWORD
+cp .env.example .env        # ajusta DB_PASSWORD y JWT_SECRET
 npm install
-
-# 2. Crear BD + tablas + datos demo
-npm run db:create
-npm run db:migrate
-npm run db:seed
-
-# 3. Arrancar API (puerto 9000)
+npm run db:create && npm run db:migrate && npm run db:seed
 npm start
-
-# 4. Frontend (otra terminal)
-cd ../client
-npm install
-npm run dev                 # http://localhost:5173
 ```
 
-## Cuentas demo
+### App móvil (Expo)
 
-| Rol | Email | Contraseña |
-|---|---|---|
-| Turista | turista@selva.com | turista123 |
-| Guía | juan@guia.com | guia123 |
-| Guía | mari@guia.com | guia123 |
-| Admin | admin@selva.com | admin123 |
+```bash
+cd mobile
+npm install
+npx expo start              # emulador Android o Expo Go
+```
 
-## Funcionalidades
+Para probar rutas en el emulador, simula la ubicación en Iquitos: `-3.749, -73.244`. Detalle en [`docs/C-arquitectura-mobile.md`](./docs/C-arquitectura-mobile.md).
 
-### Turista
-- Registro y autenticación (JWT)
-- Explorar tours y guías en un mapa interactivo (Leaflet)
-- Ver perfil de guía con rating y valoraciones
-- Reservar tours (fecha, hora, personas, punto de partida con geolocalización)
-- Cancelar reservas pendientes
-- Tracking en vivo del guía durante el tour (Socket.io + mapa)
-- Valorar tours completados
-- Chat con el guía (Socket.io)
+### Panel web (puerto 5173)
 
-### Guía
-- Perfil con bio, especialidad, idiomas, tarifa por hora y ubicación
-- Crear/editar paquetes (tours)
-- Activar/pausar disponibilidad
-- Aceptar o rechazar reservas, iniciar y completar tours
-- Enviar ubicación en tiempo real
-- Chat con el turista
-
-### Admin
-- Dashboard con estadísticas (usuarios, guías, reservas, ingresos)
-- Verificar guías
-- Listar todos los usuarios
+```bash
+cd client
+npm install
+npm run dev
+```
 
 ## Estructura
 
 ```
-SelvaGuide/
-├── backend/
-│   ├── migrations/            # 7 tablas (usuarios, guias, paquetes, reservas, tracking, valoraciones, mensajes)
-│   ├── seeders/               # datos demo
-│   ├── src/
-│   │   ├── infrastructure/    # config BD + modelos Sequelize
-│   │   ├── interfaces/        # controllers, routers, middleware, socket
-│   │   └── domain/            # repositorios
-│   └── app.js                 # servidor Express + Socket.io
-├── client/
-│   └── src/
-│       ├── pages/             # 14 páginas (Login, Home/Mapa, Booking, Dashboard Guía, Chat, Admin…)
-│       ├── components/        # Navbar, MapComponent, TourCard
-│       ├── context/           # AuthContext (JWT)
-│       ├── hooks/             # useSocket
-│       └── services/          # api (axios con proxy)
-└── README.md
+mobile/    App móvil (Expo SDK 57, expo-router) — producto principal
+backend/   API REST (Express, Sequelize, PostgreSQL, Socket.io)
+client/    Panel web (React 18, Vite, Tailwind, Leaflet)
+docs/      Visión, plan, arquitectura, ADRs y estado del proyecto
 ```
 
-## API (resumen)
+## Stack
 
-| Método | Ruta | Acceso |
-|---|---|---|
-| POST | `/api/v1/auth/registro` | público |
-| POST | `/api/v1/auth/login` | público |
-| GET | `/api/v1/guias` | público |
-| GET | `/api/v1/guias/:id` | público |
-| GET/POST | `/api/v1/paquetes` | público / guía |
-| POST | `/api/v1/reservas` | turista |
-| GET | `/api/v1/reservas/mias` | turista |
-| GET | `/api/v1/reservas/guia` | guía |
-| PUT | `/api/v1/reservas/:id/estado` | guía/turista |
-| POST/GET | `/api/v1/tracking` | guía/turista |
-| POST | `/api/v1/valoraciones` | turista |
-| POST/GET | `/api/v1/mensajes` | autenticado |
-| GET | `/api/v1/admin/stats` | admin |
+| Área | Tecnología |
+| --- | --- |
+| Mobile | TypeScript (migración gradual, [ADR-0006](./docs/adr/0006-migracion-gradual-a-typescript.md)), Expo SDK 57, React Native 0.86, expo-router, react-native-maps, i18next, expo-sqlite, expo-location |
+| Rutas | OSRM público ([ADR-0001](./docs/adr/0001-rutas-con-osrm.md)) |
+| API | Node.js, Express 4, Sequelize 6, PostgreSQL, JWT, bcrypt, Socket.io |
+| Web | React 18, Vite, Tailwind CSS, Leaflet |
 
-## Estado
+## Comandos
 
-**Funcional completo** — backend + frontend + tracking en vivo + chat probados de extremo a extremo.
+| Comando | Dónde | Qué hace |
+| --- | --- | --- |
+| `npx expo start` | `mobile/` | Levanta la app en modo desarrollo |
+| `npm run typecheck` | `mobile/` | Revisa los tipos de TypeScript |
+| `npm run check:i18n` | `mobile/` | Verifica que es, en, fr y pt tengan las mismas claves |
+| `npm run check:bundle` | `mobile/` | Compila el bundle de Android (lo mismo que el CI) |
+| `npm run db:migrate` / `db:seed` | `backend/` | Migraciones y datos demo |
+| `npm start` | `backend/` | API en modo watch |
+| `npm run dev` / `build` | `client/` | Panel web |
+
+## Ramas y contribución
+
+- `main` es la rama estable. Cada tarea se trabaja en `feature/<area>-<descripcion>` y entra por PR con `Closes #<issue>`.
+- Commits en Conventional Commits (`feat(mobile): ...`, `fix(backend): ...`).
+- El CI revisa tipos, traducciones, bundle de Android, sintaxis del backend y build del panel web.
+- Guía completa: [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+
+## Cuentas demo (backend)
+
+| Rol | Email | Contraseña |
+| --- | --- | --- |
+| Turista | turista@selva.com | turista123 |
+| Guía | juan@guia.com | guia123 |
+| Admin | admin@selva.com | admin123 |
+
+Solo para desarrollo local; se crean con `npm run db:seed`.

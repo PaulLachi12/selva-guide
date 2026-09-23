@@ -1,0 +1,512 @@
+{
+  "buscar_placeholder": "Buscar lugares o calles",
+  "categoria_todas": "Todos",
+  "categoria_turistico": "Turismo",
+  "categoria_gastronomico": "Gastronomía",
+  "categoria_deportivo": "Aventura",
+  "categoria_recreativo": "Familia",
+  "categoria_transporte": "Mototaxi / Moto",
+  "como_llegar": "Cómo llegar",
+  "como_llegar_boton": "🛺 Cómo llegar - Ver ruta y tarifa",
+  "tarifa_mototaxi": "Tarifa estimada en Mototaxi",
+  "mostrar_tarifa_chofer": "📱 Mostrar tarifa al chofer",
+  "zona_turistica": "✅ Zona Turística Sugerida",
+  "precaucion_noche": "⚠️ Precaución de noche",
+  "sos_boton": "🆘 SOS / Policía de Turismo",
+  "audio_guia": "Audio-guía",
+  "escuchar": "▶ Escuchar",
+  "detener": "⏸ Detener",
+  "resenas_titulo": "⭐ Reseñas de Viajeros",
+  "dejar_resena": "+ Dejar Reseña",
+  "consultar_whatsapp": "Consultar por WhatsApp",
+  "iniciar_sesion": "Iniciar sesión",
+  "continuar_apple": "Continuar con Apple",
+  "continuar_google": "Continuar con Google",
+  "explorar_invitado": "Explorar como invitado",
+  "cerrar_sesion": "Cerrar sesión",
+  "idioma_pais": "Idioma y país",
+  "modo_admin": "Modo Admin",
+  "editar_lugar": "Editar lugar",
+  "guardar": "Guardar",
+  "cancelar": "Cancelar",
+  "comun": {
+    "abrir_menu": "Abrir menú",
+    "cerrar": "Cerrar",
+    "emergencia": "Emergencia",
+    "poltur_telefono": "Policía de Turismo de Iquitos (POLTUR): (065) 231152",
+    "tarifa_completa": "{{soles}} ({{usd}})",
+    "sufijo_recargo_nocturno": " · incluye recargo nocturno",
+    "incluye_recargo_nocturno": "Incluye recargo nocturno",
+    "tarifa_estimada_linea": "Tarifa estimada en mototaxi: {{tarifa}}"
+  },
+  "tabs": {
+    "mapa": "Mapa",
+    "gastronomia": "Gastronomía",
+    "rutas": "Rutas",
+    "resenas": "Reseñas",
+    "mochila": "Mochila",
+    "ayuda": "Ayuda"
+  },
+  "mapa": {
+    "ubicacion": "Ubicación",
+    "ubicacion_necesaria": "Necesitamos tu ubicación para trazar la ruta.",
+    "ruta": "Ruta",
+    "ruta_no_encontrada": "No se encontró una ruta hacia este lugar.",
+    "ruta_error": "No se pudo calcular la ruta. Revisa tu conexión.",
+    "clima_lluvia": "🌧️ Lluvia en camino · Recomendado: Museo de Culturas Indígenas",
+    "clima_bueno": "☀️ Buen clima para el Malecón Tarapacá",
+    "punto_seleccionado": "Punto seleccionado en el mapa",
+    "destino_personalizado": "Destino personalizado",
+    "ubicacion_marcada": "Ubicación marcada directamente en el mapa.",
+    "acceso_desde_ubicacion": "Mototaxi desde tu ubicación actual",
+    "punto_marcado": "Punto marcado",
+    "limpiar_busqueda": "Borrar búsqueda",
+    "buscar": "Buscar",
+    "sos_label": "Llamar a emergencias",
+    "sin_resultados": "Sin resultados para “{{busqueda}}”",
+    "centrar_mapa": "Centrar mapa",
+    "como_llegar_a": "Cómo llegar a {{nombre}}",
+    "mototaxi": "Mototaxi",
+    "ruta_desde_plaza": "Ruta calculada desde la Plaza de Armas porque no compartiste tu ubicación.",
+    "categoria_servicios": "Kit del recién llegado",
+    "ruta_desde_aeropuerto": "Ruta desde el aeropuerto."
+  },
+  "detalle": {
+    "error": "Error",
+    "whatsapp_error": "No se pudo abrir WhatsApp en este dispositivo.",
+    "whatsapp_mensaje": "¡Hola! Te escribo desde la app Selva Guía • Iquitos. Quisiera coordinar una visita o reserva para \"{{nombre}}\".",
+    "atencion": "Atención",
+    "resena_faltan_datos": "Escribe tu nombre y tu comentario.",
+    "reciente": "Reciente",
+    "gracias": "¡Gracias!",
+    "resena_publicada": "Tu reseña se publicó con éxito.",
+    "lugar": "LUGAR",
+    "consultar": "Consultar",
+    "audio_sub": "Narración guiada en voz alta con acento loretano",
+    "como_llegar_acceso": "Cómo llegar y acceso",
+    "ruta_label": "Ruta:",
+    "acceso_defecto": "Mototaxi o peke-peke",
+    "distancia_label": "Distancia / Ubicación:",
+    "tarifa_desde_plaza": "Tarifa desde la Plaza de Armas: {{tarifa}}",
+    "mototaxi_seguro": "Mototaxi seguro",
+    "mototaxi_seguro_texto": "Verifica que la moto tenga placa y calcomanía de empadronamiento visibles, y acuerda la tarifa antes de subir.",
+    "sos_poltur": "🆘 SOS / Policía de Turismo de Iquitos",
+    "calculando_ruta": "Calculando ruta y tarifa en mototaxi…",
+    "ruta_recomendada": "Ruta recomendada: {{ruta}}.",
+    "ruta_recomendada_defecto": "consulta con el mototaxista la vía más directa",
+    "recomendaciones": "Recomendaciones",
+    "sin_resenas": "Aún no hay reseñas. ¡Sé el primero en calificar!",
+    "escribir_resena": "Escribir reseña",
+    "tu_nombre": "Tu nombre",
+    "nombre_placeholder": "Ej.: Marco Polo",
+    "calificacion": "Calificación",
+    "comentario": "Comentario / Experiencia",
+    "comentario_placeholder": "Cuéntanos qué tal la comida, el acceso, el guía o el precio...",
+    "publicar": "Publicar",
+    "ticket_ruta_a": "RUTA A {{nombre}}",
+    "consultar_tarifa": "Consultar tarifa",
+    "ticket_pie": "Tarifa referencial en mototaxi · Selva Guía Iquitos",
+    "toca_cerrar": "Toca para cerrar"
+  },
+  "gastro": {
+    "titulo": "Gastronomía",
+    "subtitulo": "Dónde comer en Iquitos",
+    "tab_lugares": "Dónde comer",
+    "tab_platos": "Platos típicos",
+    "nivel_todos": "Todos los niveles",
+    "nivel_alta": "Alta gama / Gourmet",
+    "nivel_intermedio": "Terrazas y río",
+    "nivel_popular": "Popular vivencial",
+    "ver_platos_audio": "Ver platos y audio →",
+    "intro_titulo": "Atrévete a probar la Amazonía",
+    "intro_sub": "Guía práctica para saber qué pedir en el mercado o restaurante sin sorpresas.",
+    "audacia": "Audacia: {{nivel}}",
+    "como_se_disfruta": "Cómo se disfruta:",
+    "precio_aprox": "Precio aprox: {{precio}}",
+    "platos": {
+      "juane": {
+        "nombre": "Juane tradicional",
+        "queEs": "El plato rey de la Amazonía. Masa de arroz sazonada con palillo, especias, huevo duro y presa de gallina, envuelta y cocida en hojas de bijao.",
+        "comoComer": "Se desenvuelve la hoja con la mano y se acompaña con ají de cocona y plátano maduro frito.",
+        "audacia": "Fácil (apto para todos los paladares)",
+        "precioAprox": "S/ 7.00 en mercado • S/ 25.00 en restaurante"
+      },
+      "tacacho": {
+        "nombre": "Tacacho con cecina y chorizo",
+        "queEs": "Bolas de plátano bellaco verde asado o frito majado con manteca de chancho y chicharrón, servido con cecina (cerdo ahumado de monte) y chorizo artesanal loretano.",
+        "comoComer": "Desmenuza la cecina y acompáñala con un bocado de tacacho humeante.",
+        "audacia": "Fácil (sabor ahumado irresistible)",
+        "precioAprox": "S/ 12.00 a S/ 32.00"
+      },
+      "paiche": {
+        "nombre": "Paiche (Arapaima gigas)",
+        "queEs": "El pez de agua dulce con escamas más grande del mundo. Su carne es blanca, firme, sin espinas pequeñas y de sabor suave y refinado.",
+        "comoComer": "A la parrilla, en chicharrón crocante o en cebiche amazónico con ají charapita.",
+        "audacia": "Fácil (experiencia gourmet recomendada)",
+        "precioAprox": "S/ 35.00 a S/ 65.00"
+      },
+      "patarashca": {
+        "nombre": "Patarashca de doncella",
+        "queEs": "Pescado amazónico condimentado con sachaculantro (culantro de monte), cebolla y ají dulce, envuelto en hojas de bijao y asado lentamente sobre carbón.",
+        "comoComer": "La hoja retiene todos los jugos naturales del pescado sin necesidad de grasa añadida.",
+        "audacia": "Fácil y muy saludable",
+        "precioAprox": "S/ 10.00 en mercado • S/ 30.00 en restaurante"
+      },
+      "chonta": {
+        "nombre": "Ensalada de chonta (palmito fresco)",
+        "queEs": "Tiras finas extraídas del corazón de la palmera amazónica. Es fresca, crujiente y se sirve fría con limón, sal y aceite.",
+        "comoComer": "La entrada perfecta para contrarrestar el calor húmedo de la selva.",
+        "audacia": "Fácil (ligera y refrescante)",
+        "precioAprox": "S/ 15.00 a S/ 25.00"
+      },
+      "suri": {
+        "nombre": "Suri a la brasa",
+        "queEs": "Larva comestible del escarabajo que se cría dentro del tronco del aguaje caído. Es rica en aceites naturales y proteínas.",
+        "comoComer": "Se asa en brochetas sobre carbón con un toque de sal. La textura exterior es crocante y por dentro suave, similar al chicharrón de pollo.",
+        "audacia": "Extrema (reto para aventureros)",
+        "precioAprox": "S/ 5.00 a S/ 8.00 la brocheta"
+      },
+      "camucamu": {
+        "nombre": "Camu camu y aguaje",
+        "queEs": "Frutas emblemáticas. El camu camu tiene 40 veces más vitamina C que la naranja; el aguaje es un fruto carnoso de palmera repleto de betacarotenos.",
+        "comoComer": "En jugos helados, raspadillas o chupetes artesanales para hidratarse en las tardes.",
+        "audacia": "Fácil (100% refrescante)",
+        "precioAprox": "S/ 3.00 a S/ 6.00 el vaso helado"
+      }
+    }
+  },
+  "rutas": {
+    "titulo": "Rutas y experiencias",
+    "subtitulo": "Excursiones, paseos por el río y selva",
+    "filtro_todas": "Todas las rutas",
+    "filtro_extremo": "Adrenalina / Off-road",
+    "filtro_naturaleza": "Naturaleza y reserva",
+    "badge_adrenalina": "Adrenalina",
+    "badge_naturaleza": "Naturaleza",
+    "diario": "Diario",
+    "explorar_como_llegar": "🛺 Explorar / Cómo llegar"
+  },
+  "resenas": {
+    "titulo": "Reseñas",
+    "subtitulo": "Opiniones de viajeros en Iquitos",
+    "ver_lugar": "Ver lugar →",
+    "reciente": "Reciente"
+  },
+  "mochila": {
+    "titulo": "Mochila",
+    "subtitulo": "Contenido sin conexión y tu progreso",
+    "descarga_titulo": "Descarga completada",
+    "descarga_msg": "La zona \"{{zona}}\" quedó guardada para usarla sin señal.",
+    "cache_titulo": "Espacio liberado",
+    "cache_msg": "Se borró el contenido guardado sin conexión.",
+    "almacenamiento_titulo": "Almacenamiento sin conexión",
+    "zonas_listas": "{{listas}} de {{total}} zonas listas sin señal",
+    "liberar": "Liberar",
+    "paquetes_titulo": "Paquetes de mapas y rutas",
+    "tam_circuitos": "{{tam}} • {{n}} circuitos con GPS",
+    "pasaporte_titulo": "Pasaporte amazónico ({{hechos}}/{{total}} retos)",
+    "pasaporte_nota": "Marca cada experiencia vivida para ganar tus sellos de explorador:",
+    "tip_titulo": "Modo avión activado:",
+    "tip_texto": "Los mapas descargados y los audios funcionan incluso en medio del río Amazonas, sin chip ni señal telefónica.",
+    "zonas": {
+      "centro": {
+        "nombre": "Iquitos Centro y Malecón",
+        "desc": "Belén, casonas del caucho, Malecón Tarapacá"
+      },
+      "nanay": {
+        "nombre": "Ruta fluvial Nanay y Momón",
+        "desc": "Bellavista Nanay, serpentario y Padre Cocha"
+      },
+      "allpahuayo": {
+        "nombre": "Reserva Allpahuayo-Mishana y Nauta",
+        "desc": "Bosque de arena blanca, varillales y Quistococha"
+      }
+    },
+    "retos": {
+      "suri": {
+        "titulo": "Comer un suri asado",
+        "desc": "En Bellavista Nanay o el Mercado de Belén"
+      },
+      "peke": {
+        "titulo": "Navegar en peke-peke",
+        "desc": "Recorre el Nanay o el Itaya en bote tradicional"
+      },
+      "juane": {
+        "titulo": "Desatar un juane en bijao",
+        "desc": "Tradición gastronómica amazónica con ají de cocona"
+      },
+      "manati": {
+        "titulo": "Visitar los manatíes en el CREA",
+        "desc": "Conoce el centro de rescate de fauna silvestre"
+      },
+      "tarantula": {
+        "titulo": "Expedición nocturna en la selva",
+        "desc": "Observa fauna con linternas de campo"
+      }
+    }
+  },
+  "ayuda": {
+    "titulo": "Ayuda y tarifas",
+    "subtitulo": "Precios de referencia y contactos de emergencia",
+    "error": "Error",
+    "error_llamar": "No se pudo marcar al número {{numero}}",
+    "tarifa_referencia": "Tarifa de referencia",
+    "destino_desde": "Destino desde {{origen}}",
+    "precio_sugerido": "precio sugerido",
+    "lluvia_fuerte": "Lluvia fuerte",
+    "despues_10pm": "Después de las 10 p. m.",
+    "emergencias": "Emergencias",
+    "consejos": "Consejos",
+    "consejo_precio": "Acuerda el precio antes de subir al mototaxi; no usan taxímetro.",
+    "consejo_chaleco": "En bote peke-peke, pide siempre chaleco salvavidas.",
+    "consejo_comision": "Si te dicen que un lugar “está cerrado” para llevarte a otro, desconfía: suele haber comisión.",
+    "tel": {
+      "policia": {
+        "titulo": "Policía de Turismo",
+        "sub": "Atención especializada al turista en la ciudad y el puerto"
+      },
+      "capitania": {
+        "titulo": "Capitanía de Puerto",
+        "sub": "Emergencias en los ríos Amazonas, Itaya y Nanay"
+      },
+      "hospital": {
+        "titulo": "Hospital Regional de Loreto",
+        "sub": "Av. 28 de Julio s/n - Punchana"
+      },
+      "bomberos": {
+        "titulo": "Bomberos Iquitos N° 22",
+        "sub": "Emergencias por fuego y rescate urbano"
+      }
+    },
+    "rutas": {
+      "1": {
+        "origen": "Plaza de Armas / Centro",
+        "destino": "Malecón Tarapacá",
+        "tiempo": "3 min",
+        "vehiculo": "Mototaxi"
+      },
+      "2": {
+        "origen": "Plaza de Armas / Centro",
+        "destino": "Mercado de Belén",
+        "tiempo": "6 min",
+        "vehiculo": "Mototaxi"
+      },
+      "3": {
+        "origen": "Plaza de Armas / Centro",
+        "destino": "Embarcadero Bellavista Nanay",
+        "tiempo": "12 min",
+        "vehiculo": "Mototaxi"
+      },
+      "4": {
+        "origen": "Plaza de Armas / Centro",
+        "destino": "Aeropuerto Coronel FAP Secada",
+        "tiempo": "20 min",
+        "vehiculo": "Mototaxi"
+      },
+      "5": {
+        "origen": "Plaza de Armas / Centro",
+        "destino": "Aeropuerto (taxi con aire acondicionado)",
+        "tiempo": "18 min",
+        "vehiculo": "Taxi auto"
+      },
+      "6": {
+        "origen": "Plaza de Armas / Centro",
+        "destino": "Zoológico Quistococha (carretera)",
+        "tiempo": "35 min",
+        "vehiculo": "Mototaxi"
+      },
+      "7": {
+        "origen": "Plaza de Armas / Centro",
+        "destino": "Centro CREA (manatíes)",
+        "tiempo": "30 min",
+        "vehiculo": "Mototaxi"
+      },
+      "8": {
+        "origen": "Bellavista Nanay",
+        "destino": "Padre Cocha / Serpentario",
+        "tiempo": "15 min por río",
+        "vehiculo": "Bote peke-peke"
+      },
+      "9": {
+        "origen": "Puerto Belén",
+        "destino": "Paseo fluvial Venecia Amazónica (por hora)",
+        "tiempo": "1 hora por río",
+        "vehiculo": "Bote peke-peke"
+      }
+    }
+  },
+  "menu": {
+    "app_titulo": "Selva Guía",
+    "app_sub": "Iquitos, Loreto",
+    "cerrar": "Cerrar menú",
+    "sec_perfil": "Perfil",
+    "admin": "Admin",
+    "login_sub": "Apple, Google o invitado",
+    "activar_admin": "Activar {{modo}} (demo)",
+    "apariencia": "Apariencia",
+    "tema_sistema": "Sistema",
+    "tema_claro": "Claro",
+    "tema_oscuro": "Oscuro",
+    "sec_explorar": "Explorar",
+    "mapa": "Mapa",
+    "mapa_sub": "Lugares cerca de ti",
+    "gastronomia": "Gastronomía",
+    "gastronomia_sub": "Restaurantes y mercados",
+    "experiencias": "Rutas y experiencias",
+    "experiencias_sub": "Tours y excursiones",
+    "resenas": "Reseñas",
+    "resenas_sub": "Opiniones de viajeros",
+    "sec_viaje": "Tu viaje",
+    "mochila": "Mochila",
+    "mochila_sub": "Contenido disponible sin conexión",
+    "ayuda": "Ayuda y tarifas",
+    "ayuda_sub": "Emergencias y precios de transporte",
+    "sec_admin": "Administración",
+    "agregar_lugar": "Agregar lugar",
+    "agregar_lugar_sub": "Publicar un nuevo punto en el mapa",
+    "version": "Versión {{version}}",
+    "privacidad": "Privacidad",
+    "privacidad_sub": "Cómo cuidamos tus datos",
+    "bienvenida": "Iquitos en 1 minuto",
+    "bienvenida_sub": "Clima, dinero, transporte y emergencias"
+  },
+  "login": {
+    "titulo": "Selva Guía",
+    "subtitulo": "Iquitos, Loreto",
+    "cerrar": "Cerrar",
+    "nota_ios": "Apple/Google: demo local mientras se configuran las credenciales OAuth.",
+    "nota_android": "Apple/Google: demo local (disponibles al configurar credenciales OAuth)."
+  },
+  "admin": {
+    "titulo_alerta": "Modo Admin",
+    "latlng_invalidas": "Lat/Lng inválidas.",
+    "error_guardar": "No se pudo guardar el cambio.",
+    "descripcion": "Descripción",
+    "lat": "Lat",
+    "lng": "Lng",
+    "tarifa_base": "Tarifa base mototaxi (S/, tramo corto)",
+    "cat_turistico": "Turístico",
+    "cat_gastronomico": "Gastronómico",
+    "cat_deportivo": "Deportivo/Extremo",
+    "cat_recreativo": "Recreativo/Familiar",
+    "faltan_datos": "Faltan datos",
+    "nombre_obligatorio": "El nombre del lugar es obligatorio.",
+    "coords_invalidas": "Coordenadas inválidas",
+    "coords_invalidas_msg": "Ingresa valores numéricos para latitud y longitud.",
+    "publicado": "¡Lugar publicado!",
+    "publicado_msg": "\"{{nombre}}\" se añadió al mapa y a las guías de la aplicación.",
+    "ir_mapa": "Ir al mapa",
+    "agregar_otro": "Agregar otro",
+    "foto_simulada": "Foto simulada",
+    "foto_adjuntada": "Se adjuntó \"{{archivo}}\" desde la galería.",
+    "titulo": "Agregar lugar",
+    "subtitulo": "Publica un punto turístico o gastronómico",
+    "formulario": "Formulario de registro",
+    "nombre": "Nombre del lugar *",
+    "categoria": "Categoría principal *",
+    "subcategoria": "Subcategoría / Nivel de precio",
+    "coordenadas": "Coordenadas GPS (latitud / longitud) *",
+    "costo": "Costo / Tarifa",
+    "dificultad": "Dificultad",
+    "acceso": "Cómo llegar (medio de transporte)",
+    "distancia": "Distancia referencial",
+    "desc_corta": "Descripción corta (vista rápida) *",
+    "desc_larga": "Descripción detallada / Historia",
+    "recomendaciones": "Recomendaciones de visita / Equipamiento",
+    "telefono": "Teléfono / WhatsApp de contacto",
+    "galeria": "Galería de fotos del lugar",
+    "subir_foto": "+ Subir foto",
+    "guardar_publicar": "Guardar y publicar en el mapa",
+    "ph_nombre": "Ej: Mirador de Bellavista Nanay",
+    "ph_subcategoria": "Ej: Alta gama / Intermedio / Popular vivencial",
+    "ph_lat": "Lat: -3.749",
+    "ph_lng": "Lng: -73.244",
+    "ph_costo": "Ej: S/ 15 entrada",
+    "ph_dificultad": "Ej: Fácil / Media",
+    "ph_acceso": "Ej: Mototaxi S/ 5 o peke-peke desde el puerto",
+    "ph_distancia": "Ej: 14 km Carretera Iquitos-Nauta",
+    "ph_desc_corta": "Resumen atractivo de 1 o 2 líneas...",
+    "ph_desc_larga": "Historia completa, biodiversidad, platos recomendados...",
+    "ph_recomendaciones": "Ej: Llevar botas impermeables, repelente, efectivo..."
+  },
+  "permisos": {
+    "continuar": "Continuar",
+    "ahora_no": "Ahora no",
+    "abrir_ajustes": "Abrir ajustes",
+    "ubicacion_titulo": "Usar tu ubicación",
+    "ubicacion_explicacion": "Para trazar la ruta desde donde estás, SelvaGuide necesita tu ubicación solo mientras usas la app. No la guardamos ni la compartimos. Si prefieres no darla, calcularemos la ruta desde la Plaza de Armas.",
+    "ubicacion_bloqueada": "La ubicación está desactivada para SelvaGuide. Puedes activarla en los ajustes del teléfono. Mientras tanto, calcularemos la ruta desde la Plaza de Armas."
+  },
+  "privacidad": {
+    "titulo": "Política de privacidad",
+    "volver": "Volver",
+    "intro": "SelvaGuide respeta tu privacidad y cumple la Ley N.° 29733 de Protección de Datos Personales del Perú. Aquí explicamos qué datos usamos y para qué.",
+    "datos_titulo": "Qué datos usamos",
+    "datos_texto": "Solo los necesarios para que la app funcione: tu ubicación mientras trazas una ruta, las fotos que tú eliges subir y, si inicias sesión, tu nombre y correo.",
+    "ubicacion_titulo": "Ubicación",
+    "ubicacion_texto": "Se usa solo mientras la app está abierta, para calcular la ruta y la tarifa. No se guarda en nuestros servidores ni se usa en segundo plano. Puedes negarla y la app seguirá funcionando.",
+    "fotos_titulo": "Cámara y fotos",
+    "fotos_texto": "Solo se piden cuando adjuntas una foto a una reseña. Las fotos que publicas son visibles para otros viajeros.",
+    "cuenta_titulo": "Cuenta",
+    "cuenta_texto": "Puedes usar la app como invitado. Si inicias sesión con Apple o Google, guardamos tu nombre, correo, idioma y reservas para darte el servicio.",
+    "terceros_titulo": "Servicios de terceros",
+    "terceros_texto": "Para calcular rutas enviamos las coordenadas de origen y destino a OpenStreetMap (OSRM), y consultamos el clima de Iquitos en Open-Meteo. No vendemos tus datos.",
+    "derechos_titulo": "Tus derechos",
+    "derechos_texto": "Puedes pedir acceso, corrección o eliminación de tus datos en cualquier momento, y retirar los permisos desde los ajustes del teléfono.",
+    "contacto_titulo": "Contacto",
+    "contacto_texto": "Para cualquier consulta sobre tus datos, escríbenos desde la sección Ayuda de la app.",
+    "actualizado": "Última actualización: septiembre de 2026"
+  },
+  "bienvenida": {
+    "titulo": "Iquitos en 1 minuto",
+    "subtitulo": "Lo esencial para tus primeras horas en la ciudad.",
+    "clima_t": "Clima",
+    "clima_d": "Caluroso y húmedo todo el año, entre 26 y 32 °C. Llueve de repente: lleva impermeable ligero, bloqueador y repelente.",
+    "moneda_t": "Moneda",
+    "moneda_d": "Se paga en soles (S/). Casi todo es en efectivo; hay cajeros y bancos en el centro, sobre todo en Jr. Próspero.",
+    "moverse_t": "Cómo moverse",
+    "moverse_d": "El mototaxi es el transporte principal. No hay taxímetro: acuerda la tarifa antes de subir. Iquitos no tiene carretera al resto del Perú; solo se llega en avión o en barco.",
+    "evitar_t": "Qué evitar",
+    "evitar_d": "Guías sin licencia que te abordan en la calle, tocar o alimentar animales silvestres y tomar agua del caño.",
+    "emergencias_t": "Emergencias",
+    "emergencias_d": "Toca un número para llamar.",
+    "poltur": "Policía de Turismo (POLTUR)",
+    "policia": "Policía",
+    "bomberos": "Bomberos",
+    "samu": "Ambulancia SAMU",
+    "llamar_a": "Llamar a {{nombre}}",
+    "btn_aeropuerto": "Del aeropuerto al centro",
+    "btn_kit": "Kit del recién llegado",
+    "btn_explorar": "Empezar a explorar"
+  },
+  "nav": {
+    "ver_indicaciones": "Ver indicaciones ({{n}})",
+    "ocultar_indicaciones": "Ocultar indicaciones",
+    "google_maps": "Google Maps",
+    "abrir_google": "Abrir en Google Maps",
+    "error_titulo": "No se pudo abrir",
+    "error_abrir": "No se pudo abrir la aplicación de navegación. Revisa que esté instalada.",
+    "salir": "Sal en dirección al destino",
+    "salir_por": "Sal por {{calle}}",
+    "llegaste": "Llegaste a tu destino",
+    "en_calle": "{{accion}} en {{calle}}",
+    "rotonda": "Toma la rotonda",
+    "incorporate": "Incorpórate {{dir}}",
+    "bifurcacion": "En la bifurcación, mantente {{dir}}",
+    "fin_via": "Al final de la vía, gira {{dir}}",
+    "sigue_recto": "Sigue recto {{dist}}",
+    "sigue_recto_por": "Sigue recto por {{calle}}",
+    "da_vuelta": "Da la vuelta",
+    "gira": "Gira {{dir}}",
+    "mod": {
+      "left": "a la izquierda",
+      "right": "a la derecha",
+      "slight_left": "ligeramente a la izquierda",
+      "slight_right": "ligeramente a la derecha",
+      "sharp_left": "bruscamente a la izquierda",
+      "sharp_right": "bruscamente a la derecha",
+      "straight": "recto",
+      "uturn": "en U"
+    }
+  }
+}

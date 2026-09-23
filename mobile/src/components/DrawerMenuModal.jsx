@@ -7,28 +7,37 @@ import Icon from './Icon';
 import LoginModal from './LoginModal';
 import { useAuth } from '../context/AuthContext';
 import { IDIOMAS } from '../i18n/locales';
-import { colors, radius, space } from '../theme';
+import { useTheme, useThemedStyles } from '../context/ThemeContext';
+import { radius, space } from '../theme';
 
 const SECCIONES = [
   {
-    titulo: 'Explorar',
+    titulo: 'menu.sec_explorar',
     items: [
-      { label: 'Mapa', sub: 'Lugares cerca de ti', icon: 'map-outline', ruta: '/(tabs)' },
-      { label: 'Gastronomía', sub: 'Restaurantes y mercados', icon: 'restaurant-outline', ruta: '/(tabs)/gastronomia' },
-      { label: 'Rutas y experiencias', sub: 'Tours y excursiones', icon: 'compass-outline', ruta: '/(tabs)/experiencias' },
-      { label: 'Reseñas', sub: 'Opiniones de viajeros', icon: 'star-outline', ruta: '/(tabs)/resenas' },
+      { label: 'menu.mapa', sub: 'menu.mapa_sub', icon: 'map-outline', ruta: '/(tabs)' },
+      { label: 'menu.gastronomia', sub: 'menu.gastronomia_sub', icon: 'restaurant-outline', ruta: '/(tabs)/gastronomia' },
+      { label: 'menu.experiencias', sub: 'menu.experiencias_sub', icon: 'compass-outline', ruta: '/(tabs)/experiencias' },
+      { label: 'menu.resenas', sub: 'menu.resenas_sub', icon: 'star-outline', ruta: '/(tabs)/resenas' },
     ],
   },
   {
-    titulo: 'Tu viaje',
+    titulo: 'menu.sec_viaje',
     items: [
-      { label: 'Mochila', sub: 'Contenido disponible sin conexión', icon: 'cloud-download-outline', ruta: '/(tabs)/mochila' },
-      { label: 'Ayuda y tarifas', sub: 'Emergencias y precios de transporte', icon: 'medkit-outline', ruta: '/(tabs)/emergencia' },
+      { label: 'menu.bienvenida', sub: 'menu.bienvenida_sub', icon: 'sunny-outline', ruta: '/bienvenida' },
+      { label: 'menu.mochila', sub: 'menu.mochila_sub', icon: 'cloud-download-outline', ruta: '/(tabs)/mochila' },
+      { label: 'menu.ayuda', sub: 'menu.ayuda_sub', icon: 'medkit-outline', ruta: '/(tabs)/emergencia' },
+      { label: 'menu.privacidad', sub: 'menu.privacidad_sub', icon: 'shield-outline', ruta: '/privacidad' },
     ],
   },
 ];
 
-const ITEM_ADMIN = { label: 'Agregar lugar', sub: 'Publicar un nuevo punto en el mapa', icon: 'add-circle-outline', ruta: '/admin/nuevo-punto' };
+const ITEM_ADMIN = { label: 'menu.agregar_lugar', sub: 'menu.agregar_lugar_sub', icon: 'add-circle-outline', ruta: '/admin/nuevo-punto' };
+
+const MODOS = [
+  { key: 'sistema', label: 'menu.tema_sistema', icon: 'phone-portrait-outline' },
+  { key: 'claro', label: 'menu.tema_claro', icon: 'sunny-outline' },
+  { key: 'oscuro', label: 'menu.tema_oscuro', icon: 'moon-outline' },
+];
 
 export default function DrawerMenuModal({ visible, onClose, rutaActual }) {
   const router = useRouter();
@@ -37,6 +46,10 @@ export default function DrawerMenuModal({ visible, onClose, rutaActual }) {
   const { usuario, esAdmin, cerrarSesion, cambiarIdioma, activarModoAdmin } = useAuth();
   const [loginVisible, setLoginVisible] = useState(false);
   const [selectorIdiomaVisible, setSelectorIdiomaVisible] = useState(false);
+  const [selectorTemaVisible, setSelectorTemaVisible] = useState(false);
+  const { colors, modo, setModo } = useTheme();
+  const styles = useThemedStyles(crearEstilos);
+  const modoActual = MODOS.find((m) => m.key === modo) || MODOS[0];
 
   const navegar = (ruta) => {
     onClose();
@@ -55,17 +68,17 @@ export default function DrawerMenuModal({ visible, onClose, rutaActual }) {
               <Icon name="leaf" size={18} color={colors.onPrimary} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.appTitle}>Selva Guía</Text>
-              <Text style={styles.appSub}>Iquitos, Loreto</Text>
+              <Text style={styles.appTitle}>{t('menu.app_titulo')}</Text>
+              <Text style={styles.appSub}>{t('menu.app_sub')}</Text>
             </View>
-            <Pressable onPress={onClose} hitSlop={10} style={styles.btnClose}>
+            <Pressable onPress={onClose} hitSlop={10} style={styles.btnClose} accessibilityLabel={t('menu.cerrar')}>
               <Icon name="close" size={22} color={colors.textMuted} />
             </Pressable>
           </View>
 
           <ScrollView contentContainerStyle={{ paddingBottom: space.xl }} showsVerticalScrollIndicator={false}>
             <View style={{ marginTop: space.lg }}>
-              <Text style={styles.seccion}>PERFIL</Text>
+              <Text style={styles.seccion}>{t('menu.sec_perfil').toUpperCase()}</Text>
 
               <Pressable
                 style={styles.item}
@@ -74,7 +87,7 @@ export default function DrawerMenuModal({ visible, onClose, rutaActual }) {
                 <Icon name={usuario ? 'log-out-outline' : 'log-in-outline'} size={20} color={colors.textMuted} />
                 <View style={{ flex: 1, marginLeft: space.md }}>
                   <Text style={styles.label}>{usuario ? t('cerrar_sesion') : t('iniciar_sesion')}</Text>
-                  <Text style={styles.sub}>{usuario ? (usuario.nombre + (esAdmin ? ' · Admin' : '')) : 'Apple, Google o invitado'}</Text>
+                  <Text style={styles.sub}>{usuario ? (usuario.nombre + (esAdmin ? ` · ${t('menu.admin')}` : '')) : t('menu.login_sub')}</Text>
                 </View>
               </Pressable>
 
@@ -99,17 +112,38 @@ export default function DrawerMenuModal({ visible, onClose, rutaActual }) {
                 </Pressable>
               ))}
 
+              <Pressable style={styles.item} onPress={() => setSelectorTemaVisible((v) => !v)}>
+                <Icon name="contrast-outline" size={20} color={colors.textMuted} />
+                <View style={{ flex: 1, marginLeft: space.md }}>
+                  <Text style={styles.label}>{t('menu.apariencia')}</Text>
+                  <Text style={styles.sub}>{t(modoActual.label)}</Text>
+                </View>
+                <Icon name={selectorTemaVisible ? 'chevron-up' : 'chevron-down'} size={16} color={colors.textSubtle} />
+              </Pressable>
+
+              {selectorTemaVisible && MODOS.map((m) => (
+                <Pressable
+                  key={m.key}
+                  style={[styles.item, { paddingLeft: space.xl }]}
+                  onPress={() => { setModo(m.key); setSelectorTemaVisible(false); }}
+                >
+                  <Icon name={m.icon} size={16} color={colors.textMuted} />
+                  <Text style={[styles.label, { marginLeft: space.md, flex: 1 }]}>{t(m.label)}</Text>
+                  {m.key === modo && <Icon name="checkmark" size={16} color={colors.primary} />}
+                </Pressable>
+              ))}
+
               {usuario && !esAdmin && (
                 <Pressable style={styles.item} onPress={activarModoAdmin}>
                   <Icon name="shield-checkmark-outline" size={20} color={colors.textMuted} />
-                  <Text style={[styles.label, { marginLeft: space.md }]}>Activar {t('modo_admin')} (demo)</Text>
+                  <Text style={[styles.label, { marginLeft: space.md }]}>{t('menu.activar_admin', { modo: t('modo_admin') })}</Text>
                 </Pressable>
               )}
             </View>
 
             {SECCIONES.map((sec) => (
               <View key={sec.titulo} style={{ marginTop: space.lg }}>
-                <Text style={styles.seccion}>{sec.titulo.toUpperCase()}</Text>
+                <Text style={styles.seccion}>{t(sec.titulo).toUpperCase()}</Text>
                 {sec.items.map((item) => {
                   const activo = rutaActual === item.ruta;
                   return (
@@ -120,8 +154,8 @@ export default function DrawerMenuModal({ visible, onClose, rutaActual }) {
                     >
                       <Icon name={item.icon} size={20} color={activo ? colors.primary : colors.textMuted} />
                       <View style={{ flex: 1, marginLeft: space.md }}>
-                        <Text style={[styles.label, activo && { color: colors.primary }]}>{item.label}</Text>
-                        <Text style={styles.sub}>{item.sub}</Text>
+                        <Text style={[styles.label, activo && { color: colors.primary }]}>{t(item.label)}</Text>
+                        <Text style={styles.sub}>{t(item.sub)}</Text>
                       </View>
                     </Pressable>
                   );
@@ -131,7 +165,7 @@ export default function DrawerMenuModal({ visible, onClose, rutaActual }) {
 
             {esAdmin && (
               <View style={{ marginTop: space.lg }}>
-                <Text style={styles.seccion}>ADMINISTRACIÓN</Text>
+                <Text style={styles.seccion}>{t('menu.sec_admin').toUpperCase()}</Text>
                 <Pressable
                   key={ITEM_ADMIN.ruta}
                   onPress={() => navegar(ITEM_ADMIN.ruta)}
@@ -139,8 +173,8 @@ export default function DrawerMenuModal({ visible, onClose, rutaActual }) {
                 >
                   <Icon name={ITEM_ADMIN.icon} size={20} color={colors.textMuted} />
                   <View style={{ flex: 1, marginLeft: space.md }}>
-                    <Text style={styles.label}>{ITEM_ADMIN.label}</Text>
-                    <Text style={styles.sub}>{ITEM_ADMIN.sub}</Text>
+                    <Text style={styles.label}>{t(ITEM_ADMIN.label)}</Text>
+                    <Text style={styles.sub}>{t(ITEM_ADMIN.sub)}</Text>
                   </View>
                 </Pressable>
               </View>
@@ -148,7 +182,7 @@ export default function DrawerMenuModal({ visible, onClose, rutaActual }) {
           </ScrollView>
 
           <View style={[styles.footer, { paddingBottom: insets.bottom + space.md }]}>
-            <Text style={styles.footerText}>Versión 1.0.0</Text>
+            <Text style={styles.footerText}>{t('menu.version', { version: '1.0.0' })}</Text>
           </View>
         </View>
       </View>
@@ -158,9 +192,9 @@ export default function DrawerMenuModal({ visible, onClose, rutaActual }) {
   );
 }
 
-const styles = StyleSheet.create({
+const crearEstilos = (colors) => StyleSheet.create({
   overlay: { flex: 1, flexDirection: 'row' },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(16,24,20,0.45)' },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)' },
   drawer: { width: '80%', maxWidth: 320, height: '100%', backgroundColor: colors.surface },
   header: {
     flexDirection: 'row',

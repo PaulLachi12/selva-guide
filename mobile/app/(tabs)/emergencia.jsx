@@ -12,7 +12,11 @@ import {
 import DrawerMenuModal from '../../src/components/DrawerMenuModal';
 import ScreenHeader from '../../src/components/ScreenHeader';
 import Icon from '../../src/components/Icon';
-import { colors, space, radius, shadow } from '../../src/theme';
+import { space, radius, shadow } from '../../src/theme';
+import { useTranslation } from 'react-i18next';
+import { useTheme, useThemedStyles } from '../../src/context/ThemeContext';
+
+// Textos visibles (origen, destino, tiempo, vehículo) en ayuda.rutas.<id>.*
 
 const RUTAS_CALCULADORA = [
   { id: '1', origen: 'Plaza de Armas / Centro', destino: 'Malecón Tarapacá', precioBase: 2.5, tiempo: '3 min', vehiculo: 'Mototaxi' },
@@ -26,7 +30,12 @@ const RUTAS_CALCULADORA = [
   { id: '9', origen: 'Puerto Belén', destino: 'Paseo Fluvial Venecia Amazónica (x Hora)', precioBase: 25.0, tiempo: '1 hora río', vehiculo: 'Bote Peke-peke' },
 ];
 
+const CONSEJOS = ['consejo_precio', 'consejo_chaleco', 'consejo_comision'];
+
 export default function EmergenciaScreen() {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(crearEstilos);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [rutaSeleccionada, setRutaSeleccionada] = useState(RUTAS_CALCULADORA[3]); // Por defecto aeropuerto
   const [lluviaFuerte, setLluviaFuerte] = useState(false);
@@ -34,32 +43,28 @@ export default function EmergenciaScreen() {
 
   const telefonosEmergencia = [
     {
-      titulo: 'Policía de Turismo',
-      sub: 'Atención especializada al turista en la ciudad y puerto',
+      id: 'policia',
       tel: '(065) 234-222',
       numeroLlamar: '065234222',
       icono: 'shield-checkmark-outline',
       urgente: true,
     },
     {
-      titulo: 'Capitanía de Puerto',
-      sub: 'Emergencias en los ríos Amazonas, Itaya y Nanay',
+      id: 'capitania',
       tel: '+51 962 111 444',
       numeroLlamar: '+51962111444',
       icono: 'boat-outline',
       urgente: true,
     },
     {
-      titulo: 'Hospital Regional de Loreto',
-      sub: 'Av. 28 de Julio s/n - Punchana',
+      id: 'hospital',
       tel: '(065) 251-930',
       numeroLlamar: '065251930',
       icono: 'medkit-outline',
       urgente: true,
     },
     {
-      titulo: 'Bomberos Iquitos N° 22',
-      sub: 'Emergencias por fuego y rescate urbano',
+      id: 'bomberos',
       tel: '116 / (065) 233-333',
       numeroLlamar: '116',
       icono: 'flame-outline',
@@ -69,7 +74,7 @@ export default function EmergenciaScreen() {
 
   const llamar = (numero) => {
     Linking.openURL(`tel:${numero}`).catch(() => {
-      Alert.alert('Error', `No se pudo marcar al número ${numero}`);
+      Alert.alert(t('ayuda.error'), t('ayuda.error_llamar', { numero }));
     });
   };
 
@@ -81,21 +86,21 @@ export default function EmergenciaScreen() {
   return (
     <View style={styles.contenedor}>
       <ScreenHeader
-        title="Ayuda y tarifas"
-        subtitle="Precios de referencia y contactos de emergencia"
+        title={t('ayuda.titulo')}
+        subtitle={t('ayuda.subtitulo')}
         onMenu={() => setDrawerVisible(true)}
       />
 
       <ScrollView style={styles.scroll} contentContainerStyle={{ padding: space.lg, paddingTop: space.sm, paddingBottom: space.xxl }}>
-        <Text style={styles.seccionTitulo}>Tarifa de referencia</Text>
+        <Text style={styles.seccionTitulo}>{t('ayuda.tarifa_referencia')}</Text>
         <View style={styles.card}>
-          <Text style={styles.label}>Destino desde {rutaSeleccionada.origen}</Text>
+          <Text style={styles.label}>{t('ayuda.destino_desde', { origen: t(`ayuda.rutas.${rutaSeleccionada.id}.origen`) })}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: space.sm, marginHorizontal: -space.lg }} contentContainerStyle={{ paddingHorizontal: space.lg }}>
             {RUTAS_CALCULADORA.map((r) => {
               const act = rutaSeleccionada.id === r.id;
               return (
                 <Pressable key={r.id} onPress={() => setRutaSeleccionada(r)} style={[styles.chip, act && styles.chipActivo]}>
-                  <Text style={[styles.chipTexto, act && styles.chipTextoActivo]}>{r.destino}</Text>
+                  <Text style={[styles.chipTexto, act && styles.chipTextoActivo]}>{t(`ayuda.rutas.${r.id}.destino`)}</Text>
                 </Pressable>
               );
             })}
@@ -103,36 +108,36 @@ export default function EmergenciaScreen() {
 
           <View style={styles.resultado}>
             <View style={{ flex: 1, paddingRight: space.md }}>
-              <Text style={styles.resDestino}>{rutaSeleccionada.destino}</Text>
+              <Text style={styles.resDestino}>{t(`ayuda.rutas.${rutaSeleccionada.id}.destino`)}</Text>
               <View style={styles.metaRow}>
                 <Icon name={rutaSeleccionada.vehiculo.includes('Bote') ? 'boat-outline' : 'car-outline'} size={14} color={colors.textMuted} />
-                <Text style={styles.meta}>{rutaSeleccionada.vehiculo}</Text>
+                <Text style={styles.meta}>{t(`ayuda.rutas.${rutaSeleccionada.id}.vehiculo`)}</Text>
                 <Icon name="time-outline" size={14} color={colors.textMuted} style={{ marginLeft: space.md }} />
-                <Text style={styles.meta}>{rutaSeleccionada.tiempo}</Text>
+                <Text style={styles.meta}>{t(`ayuda.rutas.${rutaSeleccionada.id}.tiempo`)}</Text>
               </View>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
               <Text style={styles.precio}>S/ {precioFinal.toFixed(2)}</Text>
-              <Text style={styles.precioLabel}>precio sugerido</Text>
+              <Text style={styles.precioLabel}>{t('ayuda.precio_sugerido')}</Text>
             </View>
           </View>
 
           <View style={styles.divider} />
           <View style={styles.switchItem}>
-            <Text style={styles.switchLabel}>Lluvia fuerte</Text>
+            <Text style={styles.switchLabel}>{t('ayuda.lluvia_fuerte')}</Text>
             <Switch value={lluviaFuerte} onValueChange={setLluviaFuerte} trackColor={{ false: colors.border, true: colors.primary }} />
           </View>
           <View style={styles.switchItem}>
-            <Text style={styles.switchLabel}>Después de las 10 p. m.</Text>
+            <Text style={styles.switchLabel}>{t('ayuda.despues_10pm')}</Text>
             <Switch value={horarioNoche} onValueChange={setHorarioNoche} trackColor={{ false: colors.border, true: colors.primary }} />
           </View>
         </View>
 
-        <Text style={[styles.seccionTitulo, { marginTop: space.xl }]}>Emergencias</Text>
+        <Text style={[styles.seccionTitulo, { marginTop: space.xl }]}>{t('ayuda.emergencias')}</Text>
         <View style={styles.card0}>
           {telefonosEmergencia.map((item, idx) => (
             <Pressable
-              key={idx}
+              key={item.id}
               onPress={() => llamar(item.numeroLlamar)}
               style={({ pressed }) => [styles.fila, idx > 0 && styles.filaBorde, pressed && { backgroundColor: colors.surfaceMuted }]}
             >
@@ -140,8 +145,8 @@ export default function EmergenciaScreen() {
                 <Icon name={item.icono} size={20} color={item.urgente ? colors.danger : colors.textMuted} />
               </View>
               <View style={{ flex: 1, marginLeft: space.md }}>
-                <Text style={styles.filaTitulo}>{item.titulo}</Text>
-                <Text style={styles.filaSub} numberOfLines={1}>{item.sub}</Text>
+                <Text style={styles.filaTitulo}>{t(`ayuda.tel.${item.id}.titulo`)}</Text>
+                <Text style={styles.filaSub} numberOfLines={1}>{t(`ayuda.tel.${item.id}.sub`)}</Text>
                 <Text style={styles.filaTel}>{item.tel}</Text>
               </View>
               <View style={styles.btnLlamar}>
@@ -151,16 +156,12 @@ export default function EmergenciaScreen() {
           ))}
         </View>
 
-        <Text style={[styles.seccionTitulo, { marginTop: space.xl }]}>Consejos</Text>
+        <Text style={[styles.seccionTitulo, { marginTop: space.xl }]}>{t('ayuda.consejos')}</Text>
         <View style={styles.card}>
-          {[
-            'Acuerda el precio antes de subir al mototaxi; no usan taxímetro.',
-            'En bote peke-peke, pide siempre chaleco salvavidas.',
-            'Si te dicen que un lugar “está cerrado” para llevarte a otro, desconfía: suele haber comisión.',
-          ].map((t, i) => (
-            <View key={i} style={[styles.tip, i > 0 && { marginTop: space.md }]}>
+          {CONSEJOS.map((clave, i) => (
+            <View key={clave} style={[styles.tip, i > 0 && { marginTop: space.md }]}>
               <Icon name="information-circle-outline" size={18} color={colors.primary} />
-              <Text style={styles.tipTexto}>{t}</Text>
+              <Text style={styles.tipTexto}>{t(`ayuda.${clave}`)}</Text>
             </View>
           ))}
         </View>
@@ -175,7 +176,7 @@ export default function EmergenciaScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const crearEstilos = (colors) => StyleSheet.create({
   contenedor: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
   seccionTitulo: { fontSize: 13, fontWeight: '600', color: colors.textMuted, letterSpacing: 0.4, textTransform: 'uppercase', marginBottom: space.sm, marginLeft: space.xs },

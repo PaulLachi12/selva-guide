@@ -1,0 +1,5 @@
+{
+  "NSLocationWhenInUseUsageDescription": "SelvaGuide usa tu ubicación solo mientras usas la app, para trazar la ruta hacia el lugar que elijas.",
+  "NSCameraUsageDescription": "SelvaGuide usa la cámara solo para tomar fotos que adjuntas a tus reseñas.",
+  "NSPhotoLibraryUsageDescription": "SelvaGuide accede a tus fotos solo para adjuntarlas a tus reseñas."
+}
