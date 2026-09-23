@@ -67,7 +67,9 @@
     "centrar_mapa": "Centralizar mapa",
     "como_llegar_a": "Como chegar a {{nombre}}",
     "mototaxi": "Mototáxi",
-    "ruta_desde_plaza": "Rota calculada a partir da Plaza de Armas porque você não compartilhou sua localização."
+    "ruta_desde_plaza": "Rota calculada a partir da Plaza de Armas porque você não compartilhou sua localização.",
+    "categoria_servicios": "Kit de quem acabou de chegar",
+    "ruta_desde_aeropuerto": "Rota a partir do aeroporto."
   },
   "detalle": {
     "error": "Erro",
@@ -364,7 +366,9 @@
     "agregar_lugar_sub": "Publicar um novo ponto no mapa",
     "version": "Versão {{version}}",
     "privacidad": "Privacidade",
-    "privacidad_sub": "Como cuidamos dos seus dados"
+    "privacidad_sub": "Como cuidamos dos seus dados",
+    "bienvenida": "Iquitos em 1 minuto",
+    "bienvenida_sub": "Clima, dinheiro, transporte e emergências"
   },
   "login": {
     "titulo": "Selva Guia",
@@ -729,6 +733,102 @@
       "distancia": "~0.7 km da Plaza de Armas",
       "direccion": "Plaza Castilla, perto do calçadão de Iquitos",
       "tarifaDesdePlaza": "S/ 3.00 - S/ 4.00"
+    },
+    "600": {
+      "nombre": "Aeroporto Internacional Coronel FAP Francisco Secada Vignetta",
+      "subcategoria": "Aeroporto",
+      "descripcionCorta": "Única porta aérea de Iquitos: a cidade não tem estrada para o resto do Peru.",
+      "descripcionLarga": "Principal aeroporto de Loreto, com voos diários para Lima e outras cidades. Na saída há mototáxis e táxis; combine o preço antes de subir.",
+      "recomendaciones": "Leve dinheiro em soles para o traslado e combine o preço antes de subir.",
+      "acceso": "Mototáxi ou táxi pela Av. Quiñones (20-30 min)",
+      "costo": "Mototáxi até o centro aprox. S/ 15 - S/ 20",
+      "horario": "Conforme os voos, aprox. 5:00 - 23:00",
+      "distancia": "~7 km da Plaza de Armas",
+      "direccion": "Av. José Abelardo Quiñones km 6, San Juan Bautista"
+    },
+    "601": {
+      "nombre": "BCP - Banco de Crédito (Jr. Próspero)",
+      "subcategoria": "Caixa eletrônico / Banco",
+      "descripcionCorta": "Banco com caixas eletrônicos na rua comercial do centro.",
+      "descripcionLarga": "Na Jr. Próspero há vários bancos e caixas eletrônicos. Saque soles aqui; em Iquitos quase tudo se paga em dinheiro.",
+      "recomendaciones": "Saque de dia e guarde o dinheiro antes de sair do caixa.",
+      "acceso": "A pé desde a Plaza de Armas",
+      "costo": "Cartões estrangeiros podem pagar taxa de saque",
+      "horario": "Agência seg-sex 9:00 - 18:00, sábado de manhã; caixas aprox. 24 h",
+      "distancia": "~0,2 km da Plaza de Armas",
+      "direccion": "Jr. Próspero, quadra 2, centro de Iquitos"
+    },
+    "602": {
+      "nombre": "Hospital Regional de Loreto",
+      "subcategoria": "Saúde",
+      "descripcionCorta": "Principal hospital público da região, com emergência 24 horas.",
+      "descripcionLarga": "Hospital de referência de Loreto. Atende emergências, consultas e internação.",
+      "recomendaciones": "Leve seu documento de identidade e seu seguro viagem.",
+      "acceso": "Mototáxi desde o centro (10-15 min)",
+      "costo": "Atendimento público, tarifas conforme o serviço",
+      "horario": "Emergência 24 horas",
+      "distancia": "~3 km da Plaza de Armas",
+      "direccion": "Av. 28 de Julio s/n, Punchana"
+    },
+    "603": {
+      "nombre": "Clínica Ana Stahl",
+      "subcategoria": "Saúde",
+      "descripcionCorta": "Clínica particular adventista com emergência 24 horas.",
+      "descripcionLarga": "Uma das clínicas particulares mais conhecidas de Iquitos, com emergência, consultas e laboratório.",
+      "recomendaciones": "Verifique se o seu seguro viagem tem convênio.",
+      "acceso": "Mototáxi curto desde o centro (5 min)",
+      "costo": "Clínica particular, consulta a partir de aprox. S/ 60",
+      "horario": "Emergência 24 horas",
+      "distancia": "~1,3 km da Plaza de Armas",
+      "direccion": "Av. La Marina 285, Iquitos"
+    },
+    "604": {
+      "nombre": "EsSalud Hospital III Iquitos",
+      "subcategoria": "Saúde",
+      "descripcionCorta": "Hospital da previdência social peruana com emergência 24 horas.",
+      "descripcionLarga": "Hospital do EsSalud para segurados. Em emergências graves atende qualquer pessoa.",
+      "recomendaciones": "Se você não é segurado, prefira o Hospital Regional ou uma clínica particular.",
+      "acceso": "Mototáxi desde o centro (10 min)",
+      "costo": "Para segurados do EsSalud; emergências graves são atendidas",
+      "horario": "Emergência 24 horas",
+      "distancia": "~2 km da Plaza de Armas",
+      "direccion": "Punchana, Iquitos"
+    },
+    "605": {
+      "nombre": "Loja Claro (Jr. Próspero)",
+      "subcategoria": "Chip e telefonia",
+      "descripcionCorta": "Compre um chip pré-pago peruano com dados móveis.",
+      "descripcionLarga": "Loja da operadora Claro na rua comercial. Para comprar um chip você precisa do passaporte.",
+      "recomendaciones": "Leve seu passaporte: o registro do chip é obrigatório.",
+      "acceso": "A pé desde a Plaza de Armas",
+      "costo": "Chip pré-pago a partir de aprox. S/ 5",
+      "horario": "Seg-sáb 9:00 - 20:00 aprox.",
+      "distancia": "~0,3 km da Plaza de Armas",
+      "direccion": "Jr. Próspero, centro de Iquitos"
+    },
+    "606": {
+      "nombre": "Loja Movistar (Jr. Próspero)",
+      "subcategoria": "Chip e telefonia",
+      "descripcionCorta": "Chips pré-pagos e recargas da operadora Movistar.",
+      "descripcionLarga": "Loja da operadora Movistar no centro. Para comprar um chip você precisa do passaporte.",
+      "recomendaciones": "Leve seu passaporte: o registro do chip é obrigatório.",
+      "acceso": "A pé desde a Plaza de Armas",
+      "costo": "Chip pré-pago a partir de aprox. S/ 5",
+      "horario": "Seg-sáb 9:00 - 20:00 aprox.",
+      "distancia": "~0,4 km da Plaza de Armas",
+      "direccion": "Jr. Próspero, centro de Iquitos"
+    },
+    "607": {
+      "nombre": "Cambistas da Jr. Próspero e Jr. Putumayo",
+      "subcategoria": "Câmbio",
+      "descripcionCorta": "Área de cambistas e casas de câmbio para dólares e euros.",
+      "descripcionLarga": "Ao redor da Jr. Próspero e da Jr. Putumayo há cambistas de colete e casas de câmbio. Conte o dinheiro na frente deles.",
+      "recomendaciones": "Prefira casas de câmbio com loja e confira as notas recebidas.",
+      "acceso": "A pé desde a Plaza de Armas",
+      "costo": "Sem comissão; compare a cotação",
+      "horario": "Seg-sáb 8:00 - 19:00 aprox.",
+      "distancia": "~0,1 km da Plaza de Armas",
+      "direccion": "Esquina da Jr. Próspero com a Jr. Putumayo, ao lado da Plaza de Armas"
     }
   },
   "permisos": {
@@ -758,5 +858,57 @@
     "contacto_titulo": "Contato",
     "contacto_texto": "Para qualquer dúvida sobre seus dados, escreva-nos pela seção Ajuda do app.",
     "actualizado": "Última atualização: setembro de 2026"
+  },
+  "bienvenida": {
+    "titulo": "Iquitos em 1 minuto",
+    "subtitulo": "O essencial para as suas primeiras horas na cidade.",
+    "clima_t": "Clima",
+    "clima_d": "Quente e úmido o ano todo, entre 26 e 32 °C. A chuva chega de repente: leve capa de chuva leve, protetor solar e repelente.",
+    "moneda_t": "Moeda",
+    "moneda_d": "Paga-se em soles (S/). Quase tudo é em dinheiro; há caixas eletrônicos e bancos no centro, principalmente na Jr. Próspero.",
+    "moverse_t": "Como se locomover",
+    "moverse_d": "O mototáxi é o principal transporte. Não há taxímetro: combine o preço antes de subir. Iquitos não tem estrada para o resto do Peru; só se chega de avião ou de barco.",
+    "evitar_t": "O que evitar",
+    "evitar_d": "Guias sem licença que abordam você na rua, tocar ou alimentar animais silvestres e beber água da torneira.",
+    "emergencias_t": "Emergências",
+    "emergencias_d": "Toque em um número para ligar.",
+    "poltur": "Polícia de Turismo (POLTUR)",
+    "policia": "Polícia",
+    "bomberos": "Bombeiros",
+    "samu": "Ambulância SAMU",
+    "llamar_a": "Ligar para {{nombre}}",
+    "btn_aeropuerto": "Do aeroporto ao centro",
+    "btn_kit": "Kit do recém-chegado",
+    "btn_explorar": "Começar a explorar"
+  },
+  "nav": {
+    "ver_indicaciones": "Ver instruções ({{n}})",
+    "ocultar_indicaciones": "Ocultar instruções",
+    "google_maps": "Google Maps",
+    "abrir_google": "Abrir no Google Maps",
+    "error_titulo": "Não foi possível abrir",
+    "error_abrir": "Não foi possível abrir o aplicativo de navegação. Verifique se está instalado.",
+    "salir": "Siga em direção ao destino",
+    "salir_por": "Saia pela {{calle}}",
+    "llegaste": "Você chegou ao destino",
+    "en_calle": "{{accion}} na {{calle}}",
+    "rotonda": "Entre na rotatória",
+    "incorporate": "Entre na via {{dir}}",
+    "bifurcacion": "Na bifurcação, mantenha-se {{dir}}",
+    "fin_via": "No fim da via, vire {{dir}}",
+    "sigue_recto": "Siga em frente {{dist}}",
+    "sigue_recto_por": "Siga em frente pela {{calle}}",
+    "da_vuelta": "Faça o retorno",
+    "gira": "Vire {{dir}}",
+    "mod": {
+      "left": "à esquerda",
+      "right": "à direita",
+      "slight_left": "levemente à esquerda",
+      "slight_right": "levemente à direita",
+      "sharp_left": "acentuadamente à esquerda",
+      "sharp_right": "acentuadamente à direita",
+      "straight": "em frente",
+      "uturn": "em U"
+    }
   }
 }

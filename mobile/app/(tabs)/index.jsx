@@ -26,6 +26,17 @@ import { categoryColors, space, radius, shadow } from '../../src/theme';
 import { useTranslation } from 'react-i18next';
 import { useTheme, useThemedStyles } from '../../src/context/ThemeContext';
 import { usePuntoTexto } from '../../src/i18n/contenido';
+import {
+  AEROPUERTO,
+  extraerPasos,
+  textoPaso,
+  iconoPaso,
+  formatearDistanciaPaso,
+  distanciaMinimaARuta,
+  indicePasoActual,
+  urlGoogleMaps,
+  abrirExterna,
+} from '../../src/services/navegacion';
 
 // Estilo oscuro para Google Maps (Android). En iOS se usa userInterfaceStyle.
 const MAPA_OSCURO = [
@@ -60,7 +71,9 @@ const CATEGORIAS = [
   { key: 'deportivo', labelKey: 'categoria_deportivo', icon: 'bicycle-outline' },
   { key: 'recreativo', labelKey: 'categoria_recreativo', icon: 'people-outline' },
   { key: 'transporte', labelKey: 'categoria_transporte', icon: 'car-outline' },
+  { key: 'servicios', labelKey: 'mapa.categoria_servicios', icon: 'medkit-outline' },
 ];
+const CLAVES_CATEGORIA = CATEGORIAS.map((c) => c.key);
 
 // Función de normalización robusta: quita acentos, convierte a minúsculas y quita caracteres especiales
 // Servidores OSRM públicos por modo de transporte
@@ -121,6 +134,10 @@ export default function MapaExploracionScreen() {
   // La ubicación solo se muestra si el usuario ya la concedió: el mapa nunca la pide al abrir.
   const [ubicacionOk, setUbicacionOk] = useState(false);
   const [origenPlaza, setOrigenPlaza] = useState(false);
+  // Origen forzado: { latitude, longitude, tipo: 'aeropuerto' | 'vivo' } o null (ubicación del usuario)
+  const [origenForzado, setOrigenForzado] = useState(null);
+  const [verPasos, setVerPasos] = useState(false);
+  const [pasoActual, setPasoActual] = useState(-1);
 
   useEffect(() => {
     ubicacionConcedida().then(setUbicacionOk);
@@ -132,20 +149,25 @@ export default function MapaExploracionScreen() {
     (async () => {
       setCargandoRuta(true);
       try {
-        const permitido = await pedirUbicacion();
-        if (cancelado) return;
-        setUbicacionOk(permitido);
         let origen = PLAZA_DE_ARMAS;
-        if (permitido) {
-          const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-          origen = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+        if (origenForzado) {
+          origen = { latitude: origenForzado.latitude, longitude: origenForzado.longitude };
+          setOrigenPlaza(false);
+        } else {
+          const permitido = await pedirUbicacion();
+          if (cancelado) return;
+          setUbicacionOk(permitido);
+          if (permitido) {
+            const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+            origen = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+          }
+          setOrigenPlaza(!permitido);
         }
-        setOrigenPlaza(!permitido);
 
         const clave = claveRuta(origen, destino, modoRuta);
         let calculada = cacheRutas.get(clave);
         if (!calculada) {
-          const url = `${OSRM[modoRuta]}/${origen.longitude},${origen.latitude};${destino.lng},${destino.lat}?overview=full&geometries=geojson`;
+          const url = `${OSRM[modoRuta]}/${origen.longitude},${origen.latitude};${destino.lng},${destino.lat}?overview=full&geometries=geojson&steps=true`;
           const res = await fetch(url);
           const data = await res.json();
           if (cancelado) return;
@@ -159,12 +181,16 @@ export default function MapaExploracionScreen() {
             coords: r.geometry.coordinates.map(([lng, lat]) => ({ latitude: lat, longitude: lng })),
             distancia: r.distance,
             duracion: r.duration,
+            pasos: extraerPasos(r),
           };
           cacheRutas.set(clave, calculada);
         }
         if (cancelado) return;
         const { coords } = calculada;
         setRuta(calculada);
+        setPasoActual(-1);
+        // En recálculos por desvío no se reencuadra la cámara
+        if (origenForzado?.tipo === 'vivo') return;
         mapRef.current?.fitToCoordinates(coords, {
           edgePadding: { top: 220, right: 50, bottom: 220, left: 50 },
           animated: true,
@@ -176,7 +202,50 @@ export default function MapaExploracionScreen() {
       }
     })();
     return () => { cancelado = true; };
-  }, [destino, modoRuta]);
+  }, [destino, modoRuta, origenForzado]);
+
+  // Seguimiento en vivo: solo con ruta activa y permiso ya concedido (nunca se pide aquí)
+  const rutaRef = useRef(null);
+  rutaRef.current = ruta;
+  const hayRuta = !!ruta;
+  useEffect(() => {
+    if (!hayRuta || !destino) return;
+    let sub = null;
+    let cancelado = false;
+    let fueraSeguidas = 0;
+    let ultimoRecalculo = 0;
+    (async () => {
+      try {
+        const ok = await ubicacionConcedida();
+        if (!ok || cancelado) return;
+        const s = await Location.watchPositionAsync(
+          { accuracy: Location.Accuracy.Balanced, distanceInterval: 15 },
+          (loc) => {
+            const r = rutaRef.current;
+            if (!r) return;
+            const pos = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
+            setPasoActual(indicePasoActual(pos, r.pasos));
+            if (distanciaMinimaARuta(pos, r.coords) > 50) fueraSeguidas += 1;
+            else fueraSeguidas = 0;
+            const ahora = Date.now();
+            if (fueraSeguidas >= 2 && ahora - ultimoRecalculo > 20000) {
+              ultimoRecalculo = ahora;
+              fueraSeguidas = 0;
+              setOrigenForzado({ ...pos, tipo: 'vivo' });
+            }
+          }
+        );
+        if (cancelado) s.remove();
+        else sub = s;
+      } catch (e) {
+        // Sin GPS disponible: la ruta sigue mostrándose sin seguimiento
+      }
+    })();
+    return () => {
+      cancelado = true;
+      sub?.remove();
+    };
+  }, [hayRuta, destino]);
 
   const llamarSOS = () => {
     Linking.openURL('tel:+51065231152').catch(() => {
@@ -187,6 +256,15 @@ export default function MapaExploracionScreen() {
   const cerrarRuta = () => {
     setDestino(null);
     setRuta(null);
+    setOrigenForzado(null);
+    setVerPasos(false);
+    setPasoActual(-1);
+  };
+
+  const abrirGoogleMaps = () => {
+    if (!destino) return;
+    const origenExt = origenForzado?.tipo === 'aeropuerto' ? AEROPUERTO : origenPlaza ? PLAZA_DE_ARMAS : null;
+    abrirExterna(urlGoogleMaps(destino, origenExt), t);
   };
 
   useEffect(() => {
@@ -247,6 +325,8 @@ export default function MapaExploracionScreen() {
     setMostrarResultados(false);
     setPuntoSeleccionado(punto);
     setDestino(punto);
+    setOrigenForzado(null);
+    setVerPasos(false);
 
     mapRef.current?.animateCamera(
       {
@@ -266,16 +346,24 @@ export default function MapaExploracionScreen() {
   }, [puntosFiltrados, enfocarPunto]);
 
   // "Cómo llegar" desde Rutas/Gastronomía/Reseñas llega como ?destino=<id>
-  const { destino: destinoParam } = useLocalSearchParams();
+  // ?origen=aeropuerto: la ruta sale del aeropuerto sin pedir ubicación
+  const { destino: destinoParam, origen: origenParam, categoria: categoriaParam } = useLocalSearchParams();
   useEffect(() => {
     if (!destinoParam) return;
     const punto = puntos.find((p) => String(p.id) === String(destinoParam));
     if (punto) {
       enfocarPunto(punto);
+      if (origenParam === 'aeropuerto') setOrigenForzado({ ...AEROPUERTO, tipo: 'aeropuerto' });
       setModalDetalleVisible(true);
     }
-    router.setParams({ destino: undefined });
-  }, [destinoParam, puntos, enfocarPunto, router]);
+    router.setParams({ destino: undefined, origen: undefined });
+  }, [destinoParam, origenParam, puntos, enfocarPunto, router]);
+
+  useEffect(() => {
+    if (!categoriaParam) return;
+    if (CLAVES_CATEGORIA.includes(String(categoriaParam))) setCategoria(String(categoriaParam));
+    router.setParams({ categoria: undefined });
+  }, [categoriaParam, router]);
 
   const abrirDetalle = useCallback((punto) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
@@ -301,9 +389,14 @@ export default function MapaExploracionScreen() {
     setModalDetalleVisible(false);
     setPuntoSeleccionado(puntoMapa);
     setDestino(puntoMapa);
+    setOrigenForzado(null);
+    setVerPasos(false);
   }, [t]);
 
-  const getMarkerColor = useCallback((p) => categoryColors[p.categoria] || colors.primary, [colors]);
+  const getMarkerColor = useCallback(
+    (p) => (p.categoria === 'servicios' ? colors.accent : categoryColors[p.categoria] || colors.primary),
+    [colors]
+  );
 
   return (
     <View style={styles.contenedor}>
@@ -507,6 +600,39 @@ export default function MapaExploracionScreen() {
             {ruta && origenPlaza && (
               <Text style={styles.rutaNota}>{t('mapa.ruta_desde_plaza')}</Text>
             )}
+            {ruta && origenForzado?.tipo === 'aeropuerto' && (
+              <Text style={styles.rutaNota}>{t('mapa.ruta_desde_aeropuerto')}</Text>
+            )}
+            <View style={styles.accionesRow}>
+              {ruta?.pasos?.length > 0 && (
+                <Pressable onPress={() => setVerPasos((v) => !v)} style={styles.btnSecundario} hitSlop={6}>
+                  <Icon name={verPasos ? 'chevron-up' : 'list-outline'} size={14} color={colors.primary} />
+                  <Text style={styles.btnSecundarioTexto} numberOfLines={1}>
+                    {verPasos ? t('nav.ocultar_indicaciones') : t('nav.ver_indicaciones', { n: ruta.pasos.length })}
+                  </Text>
+                </Pressable>
+              )}
+              <Pressable onPress={abrirGoogleMaps} style={styles.btnSecundario} hitSlop={6} accessibilityLabel={t('nav.abrir_google')}>
+                <Icon name="logo-google" size={14} color={colors.primary} />
+                <Text style={styles.btnSecundarioTexto} numberOfLines={1}>{t('nav.google_maps')}</Text>
+              </Pressable>
+            </View>
+            {verPasos && ruta?.pasos?.length > 0 && (
+              <ScrollView style={styles.listaPasos} nestedScrollEnabled>
+                {ruta.pasos.map((p, i) => {
+                  const actual = i === pasoActual;
+                  return (
+                    <View key={i} style={[styles.filaPaso, actual && styles.filaPasoActual]}>
+                      <Icon name={iconoPaso(p)} size={16} color={actual ? colors.primary : colors.textMuted} />
+                      <Text style={[styles.pasoTexto, actual && styles.pasoTextoActual]} numberOfLines={2}>
+                        {textoPaso(t, p)}
+                      </Text>
+                      <Text style={styles.pasoDist}>{formatearDistanciaPaso(p.distancia)}</Text>
+                    </View>
+                  );
+                })}
+              </ScrollView>
+            )}
           </View>
         )}
 
@@ -535,7 +661,10 @@ export default function MapaExploracionScreen() {
         punto={puntoSeleccionado}
         ruta={destino && puntoSeleccionado && destino.id === puntoSeleccionado.id ? ruta : null}
         cargandoRuta={cargandoRuta}
-        onComoLlegar={(punto) => setDestino(punto)}
+        onComoLlegar={(punto) => {
+          if (!destino || destino.id !== punto.id) setOrigenForzado(null);
+          setDestino(punto);
+        }}
         onClose={() => setModalDetalleVisible(false)}
       />
 
@@ -639,6 +768,34 @@ const crearEstilos = (colors) => StyleSheet.create({
   rutaInfo: { fontSize: 15, fontWeight: '700', color: colors.text },
   rutaDist: { fontSize: 13, fontWeight: '400', color: colors.textMuted },
   rutaNota: { fontSize: 12, color: colors.textMuted, marginTop: space.xs },
+  accionesRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.sm },
+  btnSecundario: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: space.sm,
+    height: 28,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    flexShrink: 1,
+  },
+  btnSecundarioTexto: { fontSize: 12, fontWeight: '600', color: colors.primary, flexShrink: 1 },
+  listaPasos: { maxHeight: 220, marginTop: space.sm },
+  filaPaso: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    paddingVertical: 6,
+    paddingHorizontal: space.xs,
+    borderRadius: radius.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  filaPasoActual: { backgroundColor: colors.primarySoft },
+  pasoTexto: { flex: 1, flexShrink: 1, fontSize: 13, color: colors.text },
+  pasoTextoActual: { color: colors.primary, fontWeight: '700' },
+  pasoDist: { fontSize: 12, color: colors.textMuted },
   rutaTarifaLinea: { fontSize: 13, fontWeight: '700', color: colors.accent, marginTop: space.sm },
   zonaRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: space.md, flexWrap: 'wrap', gap: space.sm },
   zonaBadge: { fontSize: 12, fontWeight: '600', color: colors.textMuted },

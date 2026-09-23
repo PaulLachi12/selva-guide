@@ -23,6 +23,7 @@ const SECCIONES = [
   {
     titulo: 'menu.sec_viaje',
     items: [
+      { label: 'menu.bienvenida', sub: 'menu.bienvenida_sub', icon: 'sunny-outline', ruta: '/bienvenida' },
       { label: 'menu.mochila', sub: 'menu.mochila_sub', icon: 'cloud-download-outline', ruta: '/(tabs)/mochila' },
       { label: 'menu.ayuda', sub: 'menu.ayuda_sub', icon: 'medkit-outline', ruta: '/(tabs)/emergencia' },
       { label: 'menu.privacidad', sub: 'menu.privacidad_sub', icon: 'shield-outline', ruta: '/privacidad' },

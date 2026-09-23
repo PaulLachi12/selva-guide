@@ -25,6 +25,7 @@ import { space, radius, shadow } from '../theme';
 import { useTranslation } from 'react-i18next';
 import { useTheme, useThemedStyles } from '../context/ThemeContext';
 import { usePuntoTexto } from '../i18n/contenido';
+import { urlGoogleMaps, abrirExterna } from '../services/navegacion';
 
 const VOZ_IDIOMA = { es: 'es-PE', en: 'en-US', fr: 'fr-FR', pt: 'pt-BR' };
 
@@ -283,6 +284,12 @@ export default function DetallePuntoModal({ visible, punto, ruta, cargandoRuta, 
             >
               <Text style={styles.btnComoLlegarTexto}>{t('como_llegar_boton')}</Text>
             </Pressable>
+            <View style={styles.filaExternas}>
+              <Pressable onPress={() => abrirExterna(urlGoogleMaps(punto), t)} style={styles.btnExterna}>
+                <Icon name="logo-google" size={14} color={colors.primary} />
+                <Text style={styles.btnExternaTexto} numberOfLines={1}>{t('nav.google_maps')}</Text>
+              </Pressable>
+            </View>
 
             <View style={styles.boxMototaxiSeguro}>
               <Text style={styles.mototaxiSeguroTitulo}>{t('detalle.mototaxi_seguro')}</Text>
@@ -592,6 +599,19 @@ const crearEstilos = (colors) => StyleSheet.create({
     color: colors.text,
     lineHeight: 20,
   },
+  filaExternas: { flexDirection: 'row', gap: space.sm, marginBottom: space.md },
+  btnExterna: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    height: 34,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  btnExternaTexto: { fontSize: 13, fontWeight: '600', color: colors.primary, flexShrink: 1 },
   btnComoLlegar: {
     backgroundColor: colors.primarySoft,
     borderWidth: 1,

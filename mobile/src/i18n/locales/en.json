@@ -67,7 +67,9 @@
     "centrar_mapa": "Center map",
     "como_llegar_a": "How to get to {{nombre}}",
     "mototaxi": "Mototaxi",
-    "ruta_desde_plaza": "Route calculated from the Plaza de Armas because you did not share your location."
+    "ruta_desde_plaza": "Route calculated from the Plaza de Armas because you did not share your location.",
+    "categoria_servicios": "Newcomer kit",
+    "ruta_desde_aeropuerto": "Route from the airport."
   },
   "detalle": {
     "error": "Error",
@@ -364,7 +366,9 @@
     "agregar_lugar_sub": "Publish a new spot on the map",
     "version": "Version {{version}}",
     "privacidad": "Privacy",
-    "privacidad_sub": "How we protect your data"
+    "privacidad_sub": "How we protect your data",
+    "bienvenida": "Iquitos in 1 minute",
+    "bienvenida_sub": "Weather, money, transport and emergencies"
   },
   "login": {
     "titulo": "Selva Guide",
@@ -729,6 +733,102 @@
       "distancia": "~0.7 km from Plaza de Armas",
       "direccion": "Plaza Castilla, near the Iquitos boardwalk",
       "tarifaDesdePlaza": "S/ 3.00 - S/ 4.00"
+    },
+    "600": {
+      "nombre": "Coronel FAP Francisco Secada Vignetta International Airport",
+      "subcategoria": "Airport",
+      "descripcionCorta": "Iquitos' only air gateway: the city has no road to the rest of Peru.",
+      "descripcionLarga": "The main airport of Loreto, with daily flights to Lima and other cities. Outside you will find mototaxis and taxis; agree on the fare before getting in.",
+      "recomendaciones": "Carry cash in soles for the transfer and agree on the price before getting in.",
+      "acceso": "Mototaxi or taxi along Av. Quiñones (20-30 min)",
+      "costo": "Mototaxi to downtown approx. S/ 15 - S/ 20",
+      "horario": "Depends on flights, approx. 5:00 AM - 11:00 PM",
+      "distancia": "~7 km from Plaza de Armas",
+      "direccion": "Av. José Abelardo Quiñones km 6, San Juan Bautista"
+    },
+    "601": {
+      "nombre": "BCP - Banco de Crédito (Jr. Próspero)",
+      "subcategoria": "ATM / Bank",
+      "descripcionCorta": "Bank with ATMs on the main shopping street downtown.",
+      "descripcionLarga": "Several banks and ATMs are concentrated on Jr. Próspero. Withdraw soles here; in Iquitos almost everything is paid in cash.",
+      "recomendaciones": "Withdraw during the day and put your money away before leaving the ATM.",
+      "acceso": "On foot from the Plaza de Armas",
+      "costo": "Foreign cards may be charged a withdrawal fee",
+      "horario": "Branch Mon-Fri 9:00 AM - 6:00 PM, Saturday morning; ATMs approx. 24 h",
+      "distancia": "~0.2 km from Plaza de Armas",
+      "direccion": "Jr. Próspero, block 2, downtown Iquitos"
+    },
+    "602": {
+      "nombre": "Loreto Regional Hospital",
+      "subcategoria": "Health",
+      "descripcionCorta": "The region's main public hospital, with 24-hour emergency care.",
+      "descripcionLarga": "Loreto's referral hospital. It provides emergency care, consultations and inpatient services.",
+      "recomendaciones": "Bring your ID and travel insurance.",
+      "acceso": "Mototaxi from downtown (10-15 min)",
+      "costo": "Public care, fees depend on the service",
+      "horario": "Emergencies 24 hours",
+      "distancia": "~3 km from Plaza de Armas",
+      "direccion": "Av. 28 de Julio s/n, Punchana"
+    },
+    "603": {
+      "nombre": "Ana Stahl Clinic",
+      "subcategoria": "Health",
+      "descripcionCorta": "Adventist private clinic with 24-hour emergency care.",
+      "descripcionLarga": "One of the best-known private clinics in Iquitos, with emergency care, consultations and a laboratory.",
+      "recomendaciones": "Check whether your travel insurance has an agreement with them.",
+      "acceso": "Short mototaxi ride from downtown (5 min)",
+      "costo": "Private clinic, consultations from approx. S/ 60",
+      "horario": "Emergencies 24 hours",
+      "distancia": "~1.3 km from Plaza de Armas",
+      "direccion": "Av. La Marina 285, Iquitos"
+    },
+    "604": {
+      "nombre": "EsSalud Hospital III Iquitos",
+      "subcategoria": "Health",
+      "descripcionCorta": "Peruvian social security hospital with 24-hour emergency care.",
+      "descripcionLarga": "EsSalud hospital for insured people. In serious emergencies it treats anyone.",
+      "recomendaciones": "If you are not insured, choose the Regional Hospital or a private clinic.",
+      "acceso": "Mototaxi from downtown (10 min)",
+      "costo": "For EsSalud members; serious emergencies are treated",
+      "horario": "Emergencies 24 hours",
+      "distancia": "~2 km from Plaza de Armas",
+      "direccion": "Punchana, Iquitos"
+    },
+    "605": {
+      "nombre": "Claro store (Jr. Próspero)",
+      "subcategoria": "SIM card and phone",
+      "descripcionCorta": "Buy a Peruvian prepaid SIM card with mobile data.",
+      "descripcionLarga": "Claro carrier store on the main shopping street. You need your passport to buy a SIM card.",
+      "recomendaciones": "Bring your passport: SIM registration is mandatory.",
+      "acceso": "On foot from the Plaza de Armas",
+      "costo": "Prepaid SIM from approx. S/ 5",
+      "horario": "Mon-Sat 9:00 AM - 8:00 PM approx.",
+      "distancia": "~0.3 km from Plaza de Armas",
+      "direccion": "Jr. Próspero, downtown Iquitos"
+    },
+    "606": {
+      "nombre": "Movistar store (Jr. Próspero)",
+      "subcategoria": "SIM card and phone",
+      "descripcionCorta": "Prepaid SIM cards and top-ups from Movistar.",
+      "descripcionLarga": "Movistar carrier store downtown. You need your passport to buy a SIM card.",
+      "recomendaciones": "Bring your passport: SIM registration is mandatory.",
+      "acceso": "On foot from the Plaza de Armas",
+      "costo": "Prepaid SIM from approx. S/ 5",
+      "horario": "Mon-Sat 9:00 AM - 8:00 PM approx.",
+      "distancia": "~0.4 km from Plaza de Armas",
+      "direccion": "Jr. Próspero, downtown Iquitos"
+    },
+    "607": {
+      "nombre": "Money changers on Jr. Próspero and Jr. Putumayo",
+      "subcategoria": "Currency exchange",
+      "descripcionCorta": "Area with street money changers and exchange offices for dollars and euros.",
+      "descripcionLarga": "Around Jr. Próspero and Jr. Putumayo there are money changers in vests and exchange offices. Count the money in front of them.",
+      "recomendaciones": "Prefer exchange offices with a storefront and check the bills you receive.",
+      "acceso": "On foot from the Plaza de Armas",
+      "costo": "No commission; compare exchange rates",
+      "horario": "Mon-Sat 8:00 AM - 7:00 PM approx.",
+      "distancia": "~0.1 km from Plaza de Armas",
+      "direccion": "Corner of Jr. Próspero and Jr. Putumayo, next to the Plaza de Armas"
     }
   },
   "permisos": {
@@ -758,5 +858,57 @@
     "contacto_titulo": "Contact",
     "contacto_texto": "For any question about your data, write to us from the Help section of the app.",
     "actualizado": "Last updated: September 2026"
+  },
+  "bienvenida": {
+    "titulo": "Iquitos in 1 minute",
+    "subtitulo": "The essentials for your first hours in the city.",
+    "clima_t": "Weather",
+    "clima_d": "Hot and humid all year, between 26 and 32 °C. Rain comes suddenly: bring a light raincoat, sunscreen and insect repellent.",
+    "moneda_t": "Money",
+    "moneda_d": "Prices are in soles (S/). Almost everything is paid in cash; there are ATMs and banks downtown, especially on Jr. Próspero.",
+    "moverse_t": "Getting around",
+    "moverse_d": "Mototaxis are the main transport. There are no meters: agree on the fare before getting in. Iquitos has no road to the rest of Peru; you can only arrive by plane or boat.",
+    "evitar_t": "What to avoid",
+    "evitar_d": "Unlicensed guides who approach you on the street, touching or feeding wild animals, and drinking tap water.",
+    "emergencias_t": "Emergencies",
+    "emergencias_d": "Tap a number to call.",
+    "poltur": "Tourist Police (POLTUR)",
+    "policia": "Police",
+    "bomberos": "Fire department",
+    "samu": "SAMU ambulance",
+    "llamar_a": "Call {{nombre}}",
+    "btn_aeropuerto": "From the airport to downtown",
+    "btn_kit": "Newcomer kit",
+    "btn_explorar": "Start exploring"
+  },
+  "nav": {
+    "ver_indicaciones": "Show directions ({{n}})",
+    "ocultar_indicaciones": "Hide directions",
+    "google_maps": "Google Maps",
+    "abrir_google": "Open in Google Maps",
+    "error_titulo": "Could not open",
+    "error_abrir": "The navigation app could not be opened. Check that it is installed.",
+    "salir": "Head toward your destination",
+    "salir_por": "Head out on {{calle}}",
+    "llegaste": "You have arrived",
+    "en_calle": "{{accion}} onto {{calle}}",
+    "rotonda": "Take the roundabout",
+    "incorporate": "Merge {{dir}}",
+    "bifurcacion": "At the fork, keep {{dir}}",
+    "fin_via": "At the end of the road, turn {{dir}}",
+    "sigue_recto": "Continue straight {{dist}}",
+    "sigue_recto_por": "Continue straight on {{calle}}",
+    "da_vuelta": "Make a U-turn",
+    "gira": "Turn {{dir}}",
+    "mod": {
+      "left": "left",
+      "right": "right",
+      "slight_left": "slightly left",
+      "slight_right": "slightly right",
+      "sharp_left": "sharp left",
+      "sharp_right": "sharp right",
+      "straight": "straight",
+      "uturn": "around"
+    }
   }
 }

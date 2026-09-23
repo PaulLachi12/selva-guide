@@ -67,7 +67,9 @@
     "centrar_mapa": "Centrar mapa",
     "como_llegar_a": "Cómo llegar a {{nombre}}",
     "mototaxi": "Mototaxi",
-    "ruta_desde_plaza": "Ruta calculada desde la Plaza de Armas porque no compartiste tu ubicación."
+    "ruta_desde_plaza": "Ruta calculada desde la Plaza de Armas porque no compartiste tu ubicación.",
+    "categoria_servicios": "Kit del recién llegado",
+    "ruta_desde_aeropuerto": "Ruta desde el aeropuerto."
   },
   "detalle": {
     "error": "Error",
@@ -364,7 +366,9 @@
     "agregar_lugar_sub": "Publicar un nuevo punto en el mapa",
     "version": "Versión {{version}}",
     "privacidad": "Privacidad",
-    "privacidad_sub": "Cómo cuidamos tus datos"
+    "privacidad_sub": "Cómo cuidamos tus datos",
+    "bienvenida": "Iquitos en 1 minuto",
+    "bienvenida_sub": "Clima, dinero, transporte y emergencias"
   },
   "login": {
     "titulo": "Selva Guía",
@@ -452,5 +456,57 @@
     "contacto_titulo": "Contacto",
     "contacto_texto": "Para cualquier consulta sobre tus datos, escríbenos desde la sección Ayuda de la app.",
     "actualizado": "Última actualización: septiembre de 2026"
+  },
+  "bienvenida": {
+    "titulo": "Iquitos en 1 minuto",
+    "subtitulo": "Lo esencial para tus primeras horas en la ciudad.",
+    "clima_t": "Clima",
+    "clima_d": "Caluroso y húmedo todo el año, entre 26 y 32 °C. Llueve de repente: lleva impermeable ligero, bloqueador y repelente.",
+    "moneda_t": "Moneda",
+    "moneda_d": "Se paga en soles (S/). Casi todo es en efectivo; hay cajeros y bancos en el centro, sobre todo en Jr. Próspero.",
+    "moverse_t": "Cómo moverse",
+    "moverse_d": "El mototaxi es el transporte principal. No hay taxímetro: acuerda la tarifa antes de subir. Iquitos no tiene carretera al resto del Perú; solo se llega en avión o en barco.",
+    "evitar_t": "Qué evitar",
+    "evitar_d": "Guías sin licencia que te abordan en la calle, tocar o alimentar animales silvestres y tomar agua del caño.",
+    "emergencias_t": "Emergencias",
+    "emergencias_d": "Toca un número para llamar.",
+    "poltur": "Policía de Turismo (POLTUR)",
+    "policia": "Policía",
+    "bomberos": "Bomberos",
+    "samu": "Ambulancia SAMU",
+    "llamar_a": "Llamar a {{nombre}}",
+    "btn_aeropuerto": "Del aeropuerto al centro",
+    "btn_kit": "Kit del recién llegado",
+    "btn_explorar": "Empezar a explorar"
+  },
+  "nav": {
+    "ver_indicaciones": "Ver indicaciones ({{n}})",
+    "ocultar_indicaciones": "Ocultar indicaciones",
+    "google_maps": "Google Maps",
+    "abrir_google": "Abrir en Google Maps",
+    "error_titulo": "No se pudo abrir",
+    "error_abrir": "No se pudo abrir la aplicación de navegación. Revisa que esté instalada.",
+    "salir": "Sal en dirección al destino",
+    "salir_por": "Sal por {{calle}}",
+    "llegaste": "Llegaste a tu destino",
+    "en_calle": "{{accion}} en {{calle}}",
+    "rotonda": "Toma la rotonda",
+    "incorporate": "Incorpórate {{dir}}",
+    "bifurcacion": "En la bifurcación, mantente {{dir}}",
+    "fin_via": "Al final de la vía, gira {{dir}}",
+    "sigue_recto": "Sigue recto {{dist}}",
+    "sigue_recto_por": "Sigue recto por {{calle}}",
+    "da_vuelta": "Da la vuelta",
+    "gira": "Gira {{dir}}",
+    "mod": {
+      "left": "a la izquierda",
+      "right": "a la derecha",
+      "slight_left": "ligeramente a la izquierda",
+      "slight_right": "ligeramente a la derecha",
+      "sharp_left": "bruscamente a la izquierda",
+      "sharp_right": "bruscamente a la derecha",
+      "straight": "recto",
+      "uturn": "en U"
+    }
   }
 }
