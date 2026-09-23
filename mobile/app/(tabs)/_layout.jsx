@@ -1,78 +1,38 @@
 import { Tabs } from 'expo-router';
-import { Text, View } from 'react-native';
+import Icon from '../../src/components/Icon';
+import { colors } from '../../src/theme';
 
-const VERDE = '#075E54';
-const GRIS = '#64748B';
-
-function TabGlyph({ icono, color }) {
-  return (
-    <View style={{ width: 36, height: 24, alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ fontSize: 18, color }}>{icono}</Text>
-    </View>
-  );
-}
+const tab = (title, icon, iconActive) => ({
+  title,
+  tabBarIcon: ({ color, focused }) => (
+    <Icon name={focused ? iconActive : icon} size={22} color={color} />
+  ),
+});
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: VERDE,
-        tabBarInactiveTintColor: GRIS,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSubtle,
+        // Sin position:'absolute': la tab bar reserva su propio espacio en el layout,
+        // así el MapView (capa nativa) nunca se dibuja por encima de ella ni la distorsiona.
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopColor: '#E2E8F0',
-          borderTopWidth: 1,
-          height: 64,
-          paddingBottom: 8,
-          paddingTop: 6,
+          backgroundColor: 'rgba(255,255,255,0.95)',
+          borderTopColor: colors.border,
+          borderTopWidth: 0.5,
+          elevation: 8,
         },
-        tabBarLabelStyle: { fontSize: 10, fontWeight: '700' },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Mapa',
-          tabBarIcon: ({ color }) => <TabGlyph icono="🗺️" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="gastronomia"
-        options={{
-          title: 'Gastronomía',
-          tabBarIcon: ({ color }) => <TabGlyph icono="🍽️" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="experiencias"
-        options={{
-          title: 'Rutas',
-          tabBarIcon: ({ color }) => <TabGlyph icono="🌿" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="resenas"
-        options={{
-          title: 'Reseñas',
-          tabBarIcon: ({ color }) => <TabGlyph icono="⭐" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="mochila"
-        options={{
-          title: 'Mochila',
-          tabBarIcon: ({ color }) => <TabGlyph icono="🎒" color={color} />,
-        }}
-      />
-      {/* Rutas ocultas en la barra de pestañas pero accesibles vía Drawer y Router */}
-      <Tabs.Screen
-        name="emergencia"
-        options={{
-          href: null,
-          title: 'Emergencia',
-        }}
-      />
+      <Tabs.Screen name="index" options={tab('Mapa', 'map-outline', 'map')} />
+      <Tabs.Screen name="gastronomia" options={tab('Gastronomía', 'restaurant-outline', 'restaurant')} />
+      <Tabs.Screen name="experiencias" options={tab('Rutas', 'compass-outline', 'compass')} />
+      <Tabs.Screen name="resenas" options={tab('Reseñas', 'star-outline', 'star')} />
+      <Tabs.Screen name="mochila" options={tab('Mochila', 'cloud-download-outline', 'cloud-download')} />
+      <Tabs.Screen name="emergencia" options={{ href: null, title: 'Ayuda' }} />
     </Tabs>
   );
 }

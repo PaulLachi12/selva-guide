@@ -1,196 +1,211 @@
-import React from 'react';
-import { View, Text, Pressable, StyleSheet, ScrollView, Modal, SafeAreaView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Pressable, StyleSheet, ScrollView, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import Icon from './Icon';
+import LoginModal from './LoginModal';
+import { useAuth } from '../context/AuthContext';
+import { IDIOMAS } from '../i18n/locales';
+import { colors, radius, space } from '../theme';
 
-const VERDE_N = '#075E54';
-const VERDE_B = '#128C7E';
-const BLANCO = '#FFFFFF';
-const TINTA = '#1C1C1E';
-const GRIS = '#64748B';
+const SECCIONES = [
+  {
+    titulo: 'Explorar',
+    items: [
+      { label: 'Mapa', sub: 'Lugares cerca de ti', icon: 'map-outline', ruta: '/(tabs)' },
+      { label: 'Gastronomía', sub: 'Restaurantes y mercados', icon: 'restaurant-outline', ruta: '/(tabs)/gastronomia' },
+      { label: 'Rutas y experiencias', sub: 'Tours y excursiones', icon: 'compass-outline', ruta: '/(tabs)/experiencias' },
+      { label: 'Reseñas', sub: 'Opiniones de viajeros', icon: 'star-outline', ruta: '/(tabs)/resenas' },
+    ],
+  },
+  {
+    titulo: 'Tu viaje',
+    items: [
+      { label: 'Mochila', sub: 'Contenido disponible sin conexión', icon: 'cloud-download-outline', ruta: '/(tabs)/mochila' },
+      { label: 'Ayuda y tarifas', sub: 'Emergencias y precios de transporte', icon: 'medkit-outline', ruta: '/(tabs)/emergencia' },
+    ],
+  },
+];
+
+const ITEM_ADMIN = { label: 'Agregar lugar', sub: 'Publicar un nuevo punto en el mapa', icon: 'add-circle-outline', ruta: '/admin/nuevo-punto' };
 
 export default function DrawerMenuModal({ visible, onClose, rutaActual }) {
   const router = useRouter();
-
-  const items = [
-    { label: '🗺️ Mapa de Exploración', sub: 'Puntos de interés y filtros GPS', ruta: '/(tabs)' },
-    { label: '🎒 Mi Mochila / Modo Offline', sub: 'Descargas sin internet y SQLite', ruta: '/(tabs)/mochila' },
-    { label: '🍽️ Guía Gastronómica', sub: 'Gourmet, Terrazas y Mercado vivencial', ruta: '/(tabs)/gastronomia' },
-    { label: '🌿 Experiencias y Rutas', sub: 'Trochas en cuatrimotos y reservas', ruta: '/(tabs)/experiencias' },
-    { label: '⭐ Reseñas de la Comunidad', sub: 'Consejos de viajeros y calificaciones', ruta: '/(tabs)/resenas' },
-    { label: '🔒 Panel Admin (Nuevo Punto)', sub: 'Agregar lugares al mapa', ruta: '/admin/nuevo-punto' },
-    { label: '🚨 Emergencia y Tarifario', sub: 'Policía de turismo, salud y mototaxis', ruta: '/(tabs)/emergencia' },
-  ];
+  const insets = useSafeAreaInsets();
+  const { t, i18n } = useTranslation();
+  const { usuario, esAdmin, cerrarSesion, cambiarIdioma, activarModoAdmin } = useAuth();
+  const [loginVisible, setLoginVisible] = useState(false);
+  const [selectorIdiomaVisible, setSelectorIdiomaVisible] = useState(false);
 
   const navegar = (ruta) => {
     onClose();
     router.push(ruta);
   };
 
+  const idiomaActual = IDIOMAS.find((i) => i.code === i18n.language) || IDIOMAS[0];
+
   return (
-    <Modal
-      visible={visible}
-      animationType="fade"
-      transparent
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <Pressable style={styles.backdrop} onPress={onClose} />
-        <View style={styles.drawerContainer}>
-          {/* Cabecera del Drawer */}
-          <View style={styles.drawerHeader}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <View>
-                <Text style={styles.appTitle}>🌿 Selva Guía</Text>
-                <Text style={styles.appSub}>Iquitos • Amazonía Peruana</Text>
-              </View>
-              <Pressable onPress={onClose} style={styles.btnClose}>
-                <Text style={styles.btnCloseText}>✕</Text>
-              </Pressable>
+        <View style={[styles.drawer, { paddingTop: insets.top + space.lg }]}>
+          <View style={styles.header}>
+            <View style={styles.logo}>
+              <Icon name="leaf" size={18} color={colors.onPrimary} />
             </View>
-            <Text style={styles.statusOnline}>● Sistema Táctico Offline Activo</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.appTitle}>Selva Guía</Text>
+              <Text style={styles.appSub}>Iquitos, Loreto</Text>
+            </View>
+            <Pressable onPress={onClose} hitSlop={10} style={styles.btnClose}>
+              <Icon name="close" size={22} color={colors.textMuted} />
+            </Pressable>
           </View>
 
-          {/* Lista de Secciones Escroleable */}
-          <ScrollView
-            style={styles.menuScroll}
-            contentContainerStyle={{ paddingVertical: 8, paddingBottom: 24 }}
-            showsVerticalScrollIndicator={false}
-          >
-            {items.map((item, idx) => {
-              const activo = rutaActual === item.ruta;
-              return (
+          <ScrollView contentContainerStyle={{ paddingBottom: space.xl }} showsVerticalScrollIndicator={false}>
+            <View style={{ marginTop: space.lg }}>
+              <Text style={styles.seccion}>PERFIL</Text>
+
+              <Pressable
+                style={styles.item}
+                onPress={() => (usuario ? cerrarSesion() : setLoginVisible(true))}
+              >
+                <Icon name={usuario ? 'log-out-outline' : 'log-in-outline'} size={20} color={colors.textMuted} />
+                <View style={{ flex: 1, marginLeft: space.md }}>
+                  <Text style={styles.label}>{usuario ? t('cerrar_sesion') : t('iniciar_sesion')}</Text>
+                  <Text style={styles.sub}>{usuario ? (usuario.nombre + (esAdmin ? ' · Admin' : '')) : 'Apple, Google o invitado'}</Text>
+                </View>
+              </Pressable>
+
+              <Pressable style={styles.item} onPress={() => setSelectorIdiomaVisible((v) => !v)}>
+                <Icon name="language-outline" size={20} color={colors.textMuted} />
+                <View style={{ flex: 1, marginLeft: space.md }}>
+                  <Text style={styles.label}>{t('idioma_pais')}</Text>
+                  <Text style={styles.sub}>{idiomaActual.flag} {idiomaActual.label} · {idiomaActual.pais}</Text>
+                </View>
+                <Icon name={selectorIdiomaVisible ? 'chevron-up' : 'chevron-down'} size={16} color={colors.textSubtle} />
+              </Pressable>
+
+              {selectorIdiomaVisible && IDIOMAS.map((idm) => (
                 <Pressable
-                  key={idx}
-                  onPress={() => navegar(item.ruta)}
-                  style={[styles.menuItem, activo && styles.menuItemActivo]}
+                  key={idm.code}
+                  style={[styles.item, { paddingLeft: space.xl }]}
+                  onPress={() => { cambiarIdioma(idm.code, idm.pais); setSelectorIdiomaVisible(false); }}
                 >
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.menuLabel, activo && styles.menuLabelActivo]}>
-                      {item.label}
-                    </Text>
-                    <Text style={styles.menuSub}>{item.sub}</Text>
-                  </View>
-                  <Text style={styles.chevron}>›</Text>
+                  <Text style={{ fontSize: 16 }}>{idm.flag}</Text>
+                  <Text style={[styles.label, { marginLeft: space.md, flex: 1 }]}>{idm.label}</Text>
+                  {idm.code === idiomaActual.code && <Icon name="checkmark" size={16} color={colors.primary} />}
                 </Pressable>
-              );
-            })}
+              ))}
+
+              {usuario && !esAdmin && (
+                <Pressable style={styles.item} onPress={activarModoAdmin}>
+                  <Icon name="shield-checkmark-outline" size={20} color={colors.textMuted} />
+                  <Text style={[styles.label, { marginLeft: space.md }]}>Activar {t('modo_admin')} (demo)</Text>
+                </Pressable>
+              )}
+            </View>
+
+            {SECCIONES.map((sec) => (
+              <View key={sec.titulo} style={{ marginTop: space.lg }}>
+                <Text style={styles.seccion}>{sec.titulo.toUpperCase()}</Text>
+                {sec.items.map((item) => {
+                  const activo = rutaActual === item.ruta;
+                  return (
+                    <Pressable
+                      key={item.ruta}
+                      onPress={() => navegar(item.ruta)}
+                      style={({ pressed }) => [styles.item, activo && styles.itemActivo, pressed && { opacity: 0.6 }]}
+                    >
+                      <Icon name={item.icon} size={20} color={activo ? colors.primary : colors.textMuted} />
+                      <View style={{ flex: 1, marginLeft: space.md }}>
+                        <Text style={[styles.label, activo && { color: colors.primary }]}>{item.label}</Text>
+                        <Text style={styles.sub}>{item.sub}</Text>
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ))}
+
+            {esAdmin && (
+              <View style={{ marginTop: space.lg }}>
+                <Text style={styles.seccion}>ADMINISTRACIÓN</Text>
+                <Pressable
+                  key={ITEM_ADMIN.ruta}
+                  onPress={() => navegar(ITEM_ADMIN.ruta)}
+                  style={styles.item}
+                >
+                  <Icon name={ITEM_ADMIN.icon} size={20} color={colors.textMuted} />
+                  <View style={{ flex: 1, marginLeft: space.md }}>
+                    <Text style={styles.label}>{ITEM_ADMIN.label}</Text>
+                    <Text style={styles.sub}>{ITEM_ADMIN.sub}</Text>
+                  </View>
+                </Pressable>
+              </View>
+            )}
           </ScrollView>
 
-          {/* Footer del Drawer */}
-          <View style={styles.drawerFooter}>
-            <Text style={styles.footerVersion}>Selva Guía v1.0.0 • Loreto</Text>
-            <Text style={styles.footerCoords}>GPS: -3.749° S, -73.244° W</Text>
+          <View style={[styles.footer, { paddingBottom: insets.bottom + space.md }]}>
+            <Text style={styles.footerText}>Versión 1.0.0</Text>
           </View>
         </View>
       </View>
+
+      <LoginModal visible={loginVisible} onClose={() => setLoginVisible(false)} />
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
+  overlay: { flex: 1, flexDirection: 'row' },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(16,24,20,0.45)' },
+  drawer: { width: '80%', maxWidth: 320, height: '100%', backgroundColor: colors.surface },
+  header: {
     flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: space.lg,
+    paddingBottom: space.lg,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
   },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-  },
-  drawerContainer: {
-    width: '82%',
-    maxWidth: 320,
-    backgroundColor: BLANCO,
-    height: '100%',
-    shadowColor: '#000',
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 30,
-  },
-  drawerHeader: {
-    backgroundColor: VERDE_N,
-    paddingTop: 54,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-  },
-  appTitle: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: BLANCO,
-    letterSpacing: 0.5,
-  },
-  appSub: {
-    fontSize: 13,
-    color: '#A7F3D0',
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  statusOnline: {
-    fontSize: 11,
-    color: '#34D399',
-    fontWeight: '700',
-    marginTop: 10,
-  },
-  btnClose: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+  logo: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.sm,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: space.md,
   },
-  btnCloseText: {
-    color: BLANCO,
-    fontSize: 16,
-    fontWeight: '800',
+  appTitle: { fontSize: 17, fontWeight: '700', color: colors.text },
+  appSub: { fontSize: 13, color: colors.textMuted, marginTop: 1 },
+  btnClose: { padding: 4 },
+  seccion: {
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.8,
+    color: colors.textSubtle,
+    paddingHorizontal: space.lg,
+    marginBottom: space.xs,
   },
-  menuScroll: {
-    flex: 1,
-  },
-  menuItem: {
+  item: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    paddingHorizontal: space.lg,
+    paddingVertical: space.md,
+    marginHorizontal: space.sm,
+    borderRadius: radius.md,
   },
-  menuItemActivo: {
-    backgroundColor: '#ECFDF5',
-    borderLeftWidth: 4,
-    borderLeftColor: VERDE_B,
+  itemActivo: { backgroundColor: colors.primarySoft },
+  label: { fontSize: 15, fontWeight: '600', color: colors.text },
+  sub: { fontSize: 12, color: colors.textMuted, marginTop: 1 },
+  footer: {
+    paddingHorizontal: space.lg,
+    paddingTop: space.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
   },
-  menuLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: TINTA,
-  },
-  menuLabelActivo: {
-    color: VERDE_N,
-  },
-  menuSub: {
-    fontSize: 11,
-    color: GRIS,
-    marginTop: 2,
-  },
-  chevron: {
-    fontSize: 20,
-    color: '#94A3B8',
-    marginLeft: 8,
-  },
-  drawerFooter: {
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
-    backgroundColor: '#F8FAFC',
-  },
-  footerVersion: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#475569',
-  },
-  footerCoords: {
-    fontSize: 10,
-    color: '#94A3B8',
-    marginTop: 2,
-  },
+  footerText: { fontSize: 12, color: colors.textSubtle },
 });

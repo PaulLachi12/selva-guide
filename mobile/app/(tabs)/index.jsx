@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,21 +8,20 @@ import {
   StyleSheet,
   Keyboard,
   ActivityIndicator,
-  Alert
+  Alert,
+  Linking
 } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import { obtenerPuntos, suscribirPuntos } from '../../src/data/puntosData';
+import { obtenerPuntos, suscribirPuntos, tarifaMototaxi } from '../../src/data/puntosData';
 import DetallePuntoModal from '../../src/components/DetallePuntoModal';
 import DrawerMenuModal from '../../src/components/DrawerMenuModal';
-
-const VERDE_N = '#075E54';
-const VERDE_B = '#128C7E';
-const BLANCO = '#FFFFFF';
-const TINTA = '#1C1C1E';
-const GRIS = '#64748B';
-const GRIS_CLARO = '#F1F5F9';
+import Icon from '../../src/components/Icon';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
+import GlassView from '../../src/components/GlassView';
+import { colors, categoryColors, space, radius, shadow } from '../../src/theme';
 
 // Coordenadas Iquitos Centro
 const IQUITOS = {
@@ -33,11 +32,12 @@ const IQUITOS = {
 };
 
 const CATEGORIAS = [
-  { key: 'todas', label: 'Todos' },
-  { key: 'turistico', label: 'Turístico' },
-  { key: 'gastronomico', label: 'Gastronomía' },
-  { key: 'deportivo', label: 'Deportivo/Extremo' },
-  { key: 'recreativo', label: 'Recreativo/Familiar' },
+  { key: 'todas', label: 'Todos', icon: 'apps-outline' },
+  { key: 'turistico', label: 'Turismo', icon: 'camera-outline' },
+  { key: 'gastronomico', label: 'Gastronomía', icon: 'restaurant-outline' },
+  { key: 'deportivo', label: 'Aventura', icon: 'bicycle-outline' },
+  { key: 'recreativo', label: 'Familia', icon: 'people-outline' },
+  { key: 'transporte', label: 'Mototaxi / Moto', icon: 'car-outline' },
 ];
 
 // Función de normalización robusta: quita acentos, convierte a minúsculas y quita caracteres especiales
@@ -70,8 +70,10 @@ function normalizar(s) {
 export default function MapaExploracionScreen() {
   const router = useRouter();
   const mapRef = useRef(null);
+  const insets = useSafeAreaInsets();
 
   const [puntos, setPuntos] = useState(obtenerPuntos());
+  const [clima, setClima] = useState(null); // { temp, lluvia, sugerencia }
   const [categoria, setCategoria] = useState('todas');
   const [busqueda, setBusqueda] = useState('');
   const [puntoSeleccionado, setPuntoSeleccionado] = useState(null);
@@ -79,7 +81,7 @@ export default function MapaExploracionScreen() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [mostrarResultados, setMostrarResultados] = useState(false);
   const [destino, setDestino] = useState(null);
-  const [modoRuta, setModoRuta] = useState('pie');
+  const modoRuta = 'auto'; // Mototaxi es el único transporte soportado por la app
   const [ruta, setRuta] = useState(null); // { coords, distancia, duracion }
   const [cargandoRuta, setCargandoRuta] = useState(false);
 
@@ -121,6 +123,12 @@ export default function MapaExploracionScreen() {
     return () => { cancelado = true; };
   }, [destino, modoRuta]);
 
+  const llamarSOS = () => {
+    Linking.openURL('tel:+51065231152').catch(() => {
+      Alert.alert('Emergencia', 'Policía de Turismo de Iquitos (POLTUR): (065) 231152');
+    });
+  };
+
   const cerrarRuta = () => {
     setDestino(null);
     setRuta(null);
@@ -133,10 +141,35 @@ export default function MapaExploracionScreen() {
     return desuscribir;
   }, []);
 
+  // Clima en tiempo real (Open-Meteo, sin API key) + sugerencia inteligente para el turista
+  useEffect(() => {
+    let cancelado = false;
+    (async () => {
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${IQUITOS.latitude}&longitude=${IQUITOS.longitude}&current=temperature_2m,precipitation,weather_code`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (cancelado || !data.current) return;
+        const lluvia = data.current.precipitation > 0 || (data.current.weather_code >= 51 && data.current.weather_code <= 99);
+        setClima({
+          temp: Math.round(data.current.temperature_2m),
+          lluvia,
+          sugerencia: lluvia
+            ? '🌧️ Lluvia en camino · Recomendado: Museo de Culturas Indígenas'
+            : '☀️ Buen clima para el Malecón Tarapacá',
+        });
+      } catch (e) {
+        // Sin conexión: no bloquea el uso del mapa, solo se omite el pill de clima
+      }
+    })();
+    return () => { cancelado = true; };
+  }, []);
+
   const q = normalizar(busqueda);
 
   // Filtrado de puntos y calles
-  const puntosFiltrados = puntos.filter((p) => {
+  // useMemo: solo recalcula el filtrado cuando cambian puntos/categoría/búsqueda (evita costo en cada render)
+  const puntosFiltrados = useMemo(() => puntos.filter((p) => {
     const okCat = categoria === 'todas' || p.categoria === categoria;
     if (!q) return okCat;
 
@@ -154,64 +187,76 @@ export default function MapaExploracionScreen() {
       textoDesc.includes(q);
 
     return okCat && coincide;
-  });
+  }), [puntos, categoria, q]);
 
-  // Función para mover la cámara del mapa al punto o calle seleccionado estilo Google Maps
-  const enfocarPunto = (punto) => {
+  // Cámara con física de resorte (animateCamera) + padding dinámico para no tapar el pin bajo el sheet
+  const enfocarPunto = useCallback((punto) => {
     Keyboard.dismiss();
     setMostrarResultados(false);
     setPuntoSeleccionado(punto);
     setDestino(punto);
 
-    if (mapRef.current) {
-      mapRef.current.animateToRegion(
-        {
-          latitude: punto.lat,
-          longitude: punto.lng,
-          latitudeDelta: 0.015,
-          longitudeDelta: 0.015,
-        },
-        1000
-      );
-    }
-  };
+    mapRef.current?.animateCamera(
+      {
+        center: { latitude: punto.lat, longitude: punto.lng },
+        zoom: 16,
+      },
+      { duration: 600 }
+    );
+  }, []);
 
-  const ejecutarBusqueda = () => {
+  const ejecutarBusqueda = useCallback(() => {
     Keyboard.dismiss();
     if (puntosFiltrados.length > 0) {
       // Llevar automáticamente al primer resultado coincidente
       enfocarPunto(puntosFiltrados[0]);
     }
-  };
+  }, [puntosFiltrados, enfocarPunto]);
 
-  const abrirDetalle = (punto) => {
+  const abrirDetalle = useCallback((punto) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    setModalDetalleVisible(false);
     setPuntoSeleccionado(punto);
-    setModalDetalleVisible(true);
-  };
+  }, []);
 
-  const getMarkerColor = (p) => {
-    switch (p.categoria) {
-      case 'gastronomico':
-        return '#EA580C'; // Naranja
-      case 'deportivo':
-        return '#E11D48'; // Rojo carmín
-      case 'recreativo':
-        return '#2563EB'; // Azul
-      default:
-        return VERDE_B; // Verde selva
-    }
-  };
+  // Tap libre en cualquier punto del mapa: fija un destino dinámico y calcula ruta/tarifa en mototaxi
+  const seleccionarPuntoMapa = useCallback((coordinate, esLongPress = false) => {
+    if (esLongPress) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    else Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    const puntoMapa = {
+      id: `mapa-${coordinate.latitude.toFixed(5)}-${coordinate.longitude.toFixed(5)}`,
+      nombre: 'Punto seleccionado en el mapa',
+      categoria: 'turistico',
+      subcategoria: 'Destino personalizado',
+      lat: coordinate.latitude,
+      lng: coordinate.longitude,
+      direccion: `Lat ${coordinate.latitude.toFixed(5)}, Lng ${coordinate.longitude.toFixed(5)}`,
+      descripcionCorta: 'Ubicación marcada directamente en el mapa.',
+      acceso: 'Mototaxi desde tu ubicación actual',
+    };
+    setModalDetalleVisible(false);
+    setPuntoSeleccionado(puntoMapa);
+    setDestino(puntoMapa);
+  }, []);
+
+  const getMarkerColor = useCallback((p) => categoryColors[p.categoria] || colors.primary, []);
 
   return (
     <View style={styles.contenedor}>
-      {/* Mapa en Pantalla Completa con referencia de cámara */}
       <MapView
         ref={mapRef}
         style={StyleSheet.absoluteFill}
         initialRegion={IQUITOS}
         showsUserLocation
-        showsMyLocationButton
-        onPress={() => setMostrarResultados(false)}
+        showsMyLocationButton={false}
+        showsPointsOfInterest={false}
+        onPress={(e) => {
+          Keyboard.dismiss();
+          setMostrarResultados(false);
+          if (e.nativeEvent.action === 'marker-press') return;
+          seleccionarPuntoMapa(e.nativeEvent.coordinate);
+        }}
+        onLongPress={(e) => seleccionarPuntoMapa(e.nativeEvent.coordinate, true)}
       >
         {puntosFiltrados.map((p) => (
           <Marker
@@ -221,93 +266,108 @@ export default function MapaExploracionScreen() {
             description={p.direccion || p.descripcionCorta}
             pinColor={getMarkerColor(p)}
             onPress={() => abrirDetalle(p)}
+            tracksViewChanges={false}
           />
         ))}
+        {destino && String(destino.id).startsWith('mapa-') && (
+          <Marker
+            coordinate={{ latitude: destino.lat, longitude: destino.lng }}
+            pinColor={colors.accent}
+            title="Punto marcado"
+            tracksViewChanges={false}
+          />
+        )}
         {ruta && (
           <Polyline
             coordinates={ruta.coords}
-            strokeColor={modoRuta === 'pie' ? '#2563EB' : VERDE_N}
-            strokeWidth={5}
-            lineDashPattern={modoRuta === 'pie' ? [8, 6] : undefined}
+            strokeColor={colors.primary}
+            strokeWidth={4}
           />
         )}
       </MapView>
 
-      {/* Barra Flotante Superior: Buscador Inteligente tipo Google Maps */}
-      <View style={styles.floatingTop}>
-        <View style={styles.buscador}>
-          {/* Botón Abrir Menú Lateral Drawer */}
-          <Pressable onPress={() => setDrawerVisible(true)} style={styles.btnMenuDrawer}>
-            <Text style={styles.btnMenuDrawerIcono}>☰</Text>
-          </Pressable>
-
-          <TextInput
-            value={busqueda}
-            onChangeText={(txt) => {
-              setBusqueda(txt);
-              setMostrarResultados(txt.trim().length > 0);
-            }}
-            onFocus={() => {
-              if (busqueda.trim().length > 0) setMostrarResultados(true);
-            }}
-            onSubmitEditing={ejecutarBusqueda}
-            returnKeyType="search"
-            placeholder="Buscar calle (ej: prospero, napo, nauta)..."
-            placeholderTextColor="#94A3B8"
-            style={styles.input}
-          />
-
-          {busqueda.length > 0 && (
-            <Pressable
-              onPress={() => {
-                setBusqueda('');
-                setMostrarResultados(false);
-              }}
-              style={styles.btnClear}
-            >
-              <Text style={styles.btnClearText}>✕</Text>
+      <View style={[styles.floatingTop, { top: insets.top + space.sm }]}>
+        <View style={styles.filaTop}>
+          <View style={styles.buscador}>
+            <GlassView tint="light" style={StyleSheet.absoluteFill} />
+            <Pressable onPress={() => setDrawerVisible(true)} hitSlop={8} style={styles.btnIcono}>
+              <Icon name="menu" size={22} color={colors.text} />
             </Pressable>
-          )}
 
-          {/* Botón de Buscar para llevar a la dirección */}
-          <Pressable onPress={ejecutarBusqueda} style={styles.btnBuscar}>
-            <Text style={styles.btnBuscarTexto}>Ir 🔍</Text>
+            <TextInput
+              value={busqueda}
+              onChangeText={(txt) => {
+                setBusqueda(txt);
+                setMostrarResultados(txt.trim().length > 0);
+              }}
+              onFocus={() => {
+                if (busqueda.trim().length > 0) setMostrarResultados(true);
+              }}
+              onSubmitEditing={ejecutarBusqueda}
+              returnKeyType="search"
+              placeholder="Buscar lugares o calles"
+              placeholderTextColor={colors.textSubtle}
+              style={styles.input}
+            />
+
+            {busqueda.length > 0 ? (
+              <Pressable
+                onPress={() => {
+                  Keyboard.dismiss();
+                  setBusqueda('');
+                  setMostrarResultados(false);
+                }}
+                hitSlop={8}
+                style={styles.btnIcono}
+              >
+                <Icon name="close-circle" size={20} color={colors.textSubtle} />
+              </Pressable>
+            ) : (
+              <Pressable onPress={() => { Keyboard.dismiss(); ejecutarBusqueda(); }} hitSlop={8} style={styles.btnIcono}>
+                <Icon name="search" size={20} color={colors.textMuted} />
+              </Pressable>
+            )}
+          </View>
+
+          <Pressable onPress={llamarSOS} style={styles.btnSOSFlotante} hitSlop={8}>
+            <Text style={styles.btnSOSFlotanteTexto}>🆘</Text>
           </Pressable>
         </View>
 
-        {/* Desplegable de Resultados Instantáneos tipo Google Maps */}
+        {clima && (
+          <View style={styles.climaPill}>
+            <GlassView tint="light" style={StyleSheet.absoluteFill} />
+            <Text style={styles.climaTexto}>{clima.temp}°C · {clima.sugerencia}</Text>
+          </View>
+        )}
+
         {mostrarResultados && q.length > 0 && (
           <View style={styles.dropdownResultados}>
-            <ScrollView
-              style={{ maxHeight: 220 }}
-              keyboardShouldPersistTaps="always"
-              showsVerticalScrollIndicator={true}
-            >
+            <ScrollView style={{ maxHeight: 260 }} keyboardShouldPersistTaps="handled">
               {puntosFiltrados.length === 0 ? (
                 <View style={styles.filaSinResultados}>
-                  <Text style={styles.sinResultadosTexto}>
-                    No se encontró "{busqueda}". Intenta con otra calle o nombre.
-                  </Text>
+                  <Text style={styles.sinResultadosTexto}>Sin resultados para “{busqueda}”</Text>
                 </View>
               ) : (
                 puntosFiltrados.map((item) => (
                   <Pressable
                     key={item.id}
                     onPress={() => enfocarPunto(item)}
-                    style={styles.filaResultado}
+                    style={({ pressed }) => [styles.filaResultado, pressed && { backgroundColor: colors.surfaceMuted }]}
                   >
-                    <Text style={styles.resultadoIcono}>
-                      {item.categoria === 'gastronomico' ? '🍴' : '📍'}
-                    </Text>
-                    <View style={{ flex: 1, marginLeft: 10 }}>
-                      <Text style={styles.resultadoNombre} numberOfLines={1}>
-                        {item.nombre}
-                      </Text>
+                    <View style={styles.resultadoIcono}>
+                      <Icon
+                        name={item.categoria === 'gastronomico' ? 'restaurant-outline' : 'location-outline'}
+                        size={16}
+                        color={colors.textMuted}
+                      />
+                    </View>
+                    <View style={{ flex: 1, marginLeft: space.md }}>
+                      <Text style={styles.resultadoNombre} numberOfLines={1}>{item.nombre}</Text>
                       <Text style={styles.resultadoDireccion} numberOfLines={1}>
                         {item.direccion || item.calle || item.descripcionCorta}
                       </Text>
                     </View>
-                    <Text style={styles.resultadoLlevar}>Ir →</Text>
                   </Pressable>
                 ))
               )}
@@ -315,121 +375,105 @@ export default function MapaExploracionScreen() {
           </View>
         )}
 
-        {/* Chips de Categorías con Altura Fija sin Estiramiento */}
-        <View style={styles.chipsContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingRight: 20, alignItems: 'center' }}
-          >
-            {CATEGORIAS.map((c) => {
-              const activo = categoria === c.key;
-              return (
-                <Pressable
-                  key={c.key}
-                  onPress={() => setCategoria(c.key)}
-                  style={[styles.chip, activo && styles.chipActivo]}
-                >
-                  <Text style={[styles.chipTexto, activo && styles.chipTextoActivo]}>
-                    {c.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        </View>
-      </View>
-
-      {/* Panel de ruta: modo caminando / auto */}
-      {destino && !modalDetalleVisible && (
-        <View style={styles.panelRuta}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={styles.rutaTitulo} numberOfLines={1}>Ruta a {destino.nombre}</Text>
-            <Pressable onPress={cerrarRuta} style={styles.btnClear}>
-              <Text style={styles.btnClearText}>✕</Text>
-            </Pressable>
-          </View>
-          <View style={styles.modosRow}>
-            {[{ k: 'pie', l: '🚶 Caminando' }, { k: 'auto', l: '🚗 Auto' }].map((m) => (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.chipsContainer}
+          contentContainerStyle={{ alignItems: 'center', paddingRight: space.lg }}
+        >
+          {CATEGORIAS.map((c) => {
+            const activo = categoria === c.key;
+            return (
               <Pressable
-                key={m.k}
-                onPress={() => setModoRuta(m.k)}
-                style={[styles.chip, modoRuta === m.k && styles.chipActivo]}
+                key={c.key}
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {}); setCategoria(c.key); }}
+                style={[styles.chip, activo && styles.chipActivo]}
               >
-                <Text style={[styles.chipTexto, modoRuta === m.k && styles.chipTextoActivo]}>{m.l}</Text>
+                <Icon name={c.icon} size={15} color={activo ? colors.onPrimary : colors.textMuted} />
+                <Text style={[styles.chipTexto, activo && styles.chipTextoActivo]}>{c.label}</Text>
               </Pressable>
-            ))}
-            <View style={{ flex: 1, alignItems: 'flex-end' }}>
-              {cargandoRuta ? (
-                <ActivityIndicator color={VERDE_N} />
-              ) : ruta ? (
-                <Text style={styles.rutaInfo}>
-                  {formatearDuracion(ruta.duracion)} · {formatearDistancia(ruta.distancia)}
-                </Text>
-              ) : null}
-            </View>
-          </View>
+            );
+          })}
+        </ScrollView>
+      </View>
+
+      <View style={styles.bottomArea} pointerEvents="box-none">
+        <View style={styles.fabColumn} pointerEvents="box-none">
+          <Pressable
+            style={styles.fab}
+            onPress={() => mapRef.current?.animateToRegion(IQUITOS, 800)}
+            accessibilityLabel="Centrar mapa"
+          >
+            <Icon name="locate" size={20} color={colors.text} />
+          </Pressable>
         </View>
-      )}
 
-      {/* Vista previa rápida al pie si hay selección rápida */}
-      {puntoSeleccionado && !modalDetalleVisible && (
-        <Pressable
-          style={styles.cardPreview}
-          onPress={() => setModalDetalleVisible(true)}
-        >
-          <View style={{ flex: 1 }}>
+        {destino && !modalDetalleVisible && (
+          <View style={styles.card}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.previewCategoria}>
-                {puntoSeleccionado.subcategoria || puntoSeleccionado.categoria}
-              </Text>
-              <Text style={styles.previewRating}>★ {puntoSeleccionado.rating || 4.8}</Text>
+              <Text style={styles.rutaTitulo} numberOfLines={1}>Cómo llegar a {destino.nombre}</Text>
+              <Pressable onPress={cerrarRuta} hitSlop={10}>
+                <Icon name="close" size={20} color={colors.textMuted} />
+              </Pressable>
             </View>
-            <Text style={styles.previewTitulo} numberOfLines={1}>
-              {puntoSeleccionado.nombre}
-            </Text>
-            <Text style={styles.previewDesc} numberOfLines={1}>
-              📍 {puntoSeleccionado.direccion || puntoSeleccionado.calle || puntoSeleccionado.descripcionCorta}
-            </Text>
+            <View style={styles.modosRow}>
+              <View style={[styles.segmento, styles.segmentoActivo]}>
+                <Icon name="car-outline" size={16} color={colors.primary} />
+                <Text style={[styles.segmentoTexto, { color: colors.primary }]}>Mototaxi</Text>
+              </View>
+              <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                {cargandoRuta ? (
+                  <ActivityIndicator color={colors.primary} />
+                ) : ruta ? (
+                  <Text style={styles.rutaInfo}>
+                    {formatearDuracion(ruta.duracion)}
+                    <Text style={styles.rutaDist}>  ·  {formatearDistancia(ruta.distancia)}</Text>
+                  </Text>
+                ) : null}
+              </View>
+            </View>
+            {ruta && (
+              <Text style={styles.rutaTarifaLinea}>
+                Tarifa estimada en Mototaxi: {tarifaMototaxi(ruta.distancia).etiquetaCompleta}
+              </Text>
+            )}
+            <View style={styles.zonaRow}>
+              <Text style={styles.zonaBadge}>
+                {tarifaMototaxi(ruta ? ruta.distancia : 0).nocturno ? '⚠️ Precaución de noche' : '✅ Zona Turística Sugerida'}
+              </Text>
+            </View>
           </View>
-          <View style={styles.btnVerDetalle}>
-            <Text style={styles.btnVerDetalleTexto}>Ver detalle →</Text>
-          </View>
-        </Pressable>
-      )}
+        )}
 
-      {/* Botón Flotante para recentrar en Iquitos */}
-      <View style={styles.floatingCenterBtn}>
-        <Pressable
-          style={styles.fabBtnCenter}
-          onPress={() => {
-            if (mapRef.current) {
-              mapRef.current.animateToRegion(IQUITOS, 800);
-            }
-          }}
-        >
-          <Text style={styles.fabCenterText}>🎯</Text>
-        </Pressable>
+        {puntoSeleccionado && !modalDetalleVisible && (
+          <Pressable style={[styles.card, styles.cardPreview]} onPress={() => setModalDetalleVisible(true)}>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={[styles.previewCategoria, { color: getMarkerColor(puntoSeleccionado) }]}>
+                  {puntoSeleccionado.subcategoria || puntoSeleccionado.categoria}
+                </Text>
+                <Icon name="star" size={12} color={colors.star} style={{ marginLeft: space.sm }} />
+                <Text style={styles.previewRating}>{puntoSeleccionado.rating || 4.8}</Text>
+              </View>
+              <Text style={styles.previewTitulo} numberOfLines={1}>{puntoSeleccionado.nombre}</Text>
+              <Text style={styles.previewDesc} numberOfLines={1}>
+                {puntoSeleccionado.direccion || puntoSeleccionado.calle || puntoSeleccionado.descripcionCorta}
+              </Text>
+            </View>
+            <Icon name="chevron-forward" size={20} color={colors.textSubtle} />
+          </Pressable>
+        )}
       </View>
 
-      {/* Botón Flotante Mochila */}
-      <View style={styles.floatingBottomRight}>
-        <Pressable
-          style={styles.fabBtn}
-          onPress={() => router.push('/(tabs)/mochila')}
-        >
-          <Text style={styles.fabIcon}>🎒</Text>
-        </Pressable>
-      </View>
-
-      {/* Bottom Sheet Modal Completo */}
       <DetallePuntoModal
         visible={modalDetalleVisible}
         punto={puntoSeleccionado}
+        ruta={destino && puntoSeleccionado && destino.id === puntoSeleccionado.id ? ruta : null}
+        cargandoRuta={cargandoRuta}
+        onComoLlegar={(punto) => setDestino(punto)}
         onClose={() => setModalDetalleVisible(false)}
       />
 
-      {/* Drawer Menú Lateral Modal */}
       <DrawerMenuModal
         visible={drawerVisible}
         onClose={() => setDrawerVisible(false)}
@@ -440,264 +484,118 @@ export default function MapaExploracionScreen() {
 }
 
 const styles = StyleSheet.create({
-  contenedor: {
-    flex: 1,
-    backgroundColor: '#E2E8F0',
-  },
-  floatingTop: {
-    position: 'absolute',
-    top: 50,
-    left: 14,
-    right: 14,
-  },
+  contenedor: { flex: 1, backgroundColor: colors.bg },
+  floatingTop: { position: 'absolute', left: space.lg, right: space.lg, zIndex: 20, elevation: 20 },
   buscador: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: BLANCO,
-    borderRadius: 14,
-    paddingHorizontal: 10,
-    height: 52,
-    shadowColor: '#000',
-    shadowOpacity: 0.16,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-  btnMenuDrawer: {
-    padding: 8,
-    marginRight: 4,
-    borderRadius: 8,
-    backgroundColor: '#F1F5F9',
-  },
-  btnMenuDrawerIcono: {
-    fontSize: 18,
-    color: VERDE_N,
-    fontWeight: '800',
-  },
-  input: {
-    flex: 1,
-    height: 48,
-    fontSize: 14,
-    color: TINTA,
-    paddingHorizontal: 6,
-  },
-  btnClear: {
-    padding: 6,
-  },
-  btnClearText: {
-    fontSize: 14,
-    color: GRIS,
-    fontWeight: '700',
-  },
-  btnBuscar: {
-    backgroundColor: VERDE_N,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginLeft: 4,
-  },
-  btnBuscarTexto: {
-    color: BLANCO,
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  // Desplegable de Resultados
-  dropdownResultados: {
-    backgroundColor: BLANCO,
-    borderRadius: 14,
-    marginTop: 6,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 10,
+    borderRadius: radius.md,
+    paddingHorizontal: space.sm,
+    height: 50,
     overflow: 'hidden',
+    flex: 1,
+    ...shadow.md,
+  },
+  btnIcono: { padding: space.sm },
+  input: { flex: 1, height: 48, fontSize: 16, color: colors.text, paddingHorizontal: space.xs },
+  dropdownResultados: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    marginTop: space.sm,
+    overflow: 'hidden',
+    ...shadow.md,
   },
   filaResultado: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    paddingHorizontal: space.lg,
+    paddingVertical: space.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
   },
   resultadoIcono: {
-    fontSize: 18,
-  },
-  resultadoNombre: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: TINTA,
-  },
-  resultadoDireccion: {
-    fontSize: 11,
-    color: GRIS,
-    marginTop: 1,
-  },
-  resultadoLlevar: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: VERDE_B,
-    marginLeft: 8,
-  },
-  filaSinResultados: {
-    padding: 16,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.surfaceMuted,
     alignItems: 'center',
-  },
-  sinResultadosTexto: {
-    fontSize: 12,
-    color: GRIS,
-    textAlign: 'center',
-  },
-  // Chips
-  chipsContainer: {
-    height: 46,
-    marginTop: 8,
     justifyContent: 'center',
   },
+  resultadoNombre: { fontSize: 15, fontWeight: '600', color: colors.text },
+  resultadoDireccion: { fontSize: 13, color: colors.textMuted, marginTop: 1 },
+  filaSinResultados: { padding: space.lg, alignItems: 'center' },
+  sinResultadosTexto: { fontSize: 14, color: colors.textMuted },
+  chipsContainer: { marginTop: space.sm, flexGrow: 0 },
   chip: {
-    backgroundColor: BLANCO,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    marginRight: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: colors.surface,
+    paddingHorizontal: space.md,
     height: 34,
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
+    borderRadius: radius.pill,
+    marginRight: space.sm,
+    ...shadow.sm,
   },
-  chipActivo: {
-    backgroundColor: VERDE_N,
-  },
-  chipTexto: {
-    color: '#334155',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  chipTextoActivo: {
-    color: BLANCO,
-  },
-  cardPreview: {
-    position: 'absolute',
-    bottom: 25,
-    left: 14,
-    right: 75,
-    backgroundColor: BLANCO,
-    borderRadius: 16,
-    padding: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-  previewCategoria: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: VERDE_B,
-    textTransform: 'uppercase',
-  },
-  previewRating: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#D97706',
-    marginLeft: 8,
-  },
-  previewTitulo: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: TINTA,
-    marginTop: 2,
-  },
-  previewDesc: {
-    fontSize: 12,
-    color: GRIS,
-    marginTop: 2,
-  },
-  btnVerDetalle: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    marginLeft: 8,
-  },
-  btnVerDetalleTexto: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: VERDE_N,
-  },
-  panelRuta: {
-    position: 'absolute',
-    bottom: 110,
-    left: 14,
-    right: 75,
-    backgroundColor: BLANCO,
-    borderRadius: 16,
-    padding: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-  rutaTitulo: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '700',
-    color: TINTA,
-  },
-  modosRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  rutaInfo: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: VERDE_N,
-  },
-  floatingCenterBtn: {
-    position: 'absolute',
-    bottom: 85,
-    right: 14,
-  },
-  fabBtnCenter: {
+  chipActivo: { backgroundColor: colors.primary },
+  chipTexto: { color: colors.text, fontSize: 13, fontWeight: '500' },
+  chipTextoActivo: { color: colors.onPrimary, fontWeight: '600' },
+  bottomArea: { position: 'absolute', left: space.lg, right: space.lg, bottom: space.lg, gap: space.sm, zIndex: 10, elevation: 10 },
+  fabColumn: { alignItems: 'flex-end' },
+  fab: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: BLANCO,
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-    elevation: 6,
+    ...shadow.md,
+  },
+  card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: space.lg, ...shadow.md },
+  cardPreview: { flexDirection: 'row', alignItems: 'center' },
+  previewCategoria: { fontSize: 12, fontWeight: '600', textTransform: 'capitalize' },
+  previewRating: { fontSize: 12, fontWeight: '600', color: colors.text, marginLeft: 3 },
+  previewTitulo: { fontSize: 17, fontWeight: '600', color: colors.text, marginTop: 3 },
+  previewDesc: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
+  rutaTitulo: { flex: 1, fontSize: 15, fontWeight: '600', color: colors.text, marginRight: space.sm },
+  modosRow: { flexDirection: 'row', alignItems: 'center', marginTop: space.md, gap: space.sm },
+  segmento: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: space.md,
+    height: 32,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
   },
-  fabCenterText: {
-    fontSize: 20,
-  },
-  floatingBottomRight: {
-    position: 'absolute',
-    bottom: 25,
-    right: 14,
-  },
-  fabBtn: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: VERDE_N,
+  segmentoActivo: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
+  segmentoTexto: { fontSize: 13, fontWeight: '500', color: colors.textMuted },
+  rutaInfo: { fontSize: 15, fontWeight: '700', color: colors.text },
+  rutaDist: { fontSize: 13, fontWeight: '400', color: colors.textMuted },
+  rutaTarifaLinea: { fontSize: 13, fontWeight: '700', color: colors.accent, marginTop: space.sm },
+  zonaRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: space.md, flexWrap: 'wrap', gap: space.sm },
+  zonaBadge: { fontSize: 12, fontWeight: '600', color: colors.textMuted },
+  filaTop: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginBottom: space.sm },
+  btnSOSFlotante: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: colors.danger,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 8,
+    ...shadow.md,
   },
-  fabIcon: {
-    fontSize: 24,
+  btnSOSFlotanteTexto: { fontSize: 22 },
+  climaPill: {
+    marginTop: 0,
+    marginBottom: space.sm,
+    alignSelf: 'flex-start',
+    paddingHorizontal: space.md,
+    paddingVertical: 8,
+    borderRadius: radius.pill,
+    overflow: 'hidden',
+    ...shadow.sm,
   },
+  climaTexto: { fontSize: 12, fontWeight: '600', color: colors.text },
 });
