@@ -4,7 +4,7 @@
 
 Cada permiso se pide **solo en el momento en que se usa**, con una explicación previa. Si el usuario lo niega, la app sigue funcionando. Nunca se piden permisos al abrir la app.
 
-La lógica vive en `mobile/src/services/permisos.js`.
+La lógica vive en `mobile/src/services/permisos.ts`.
 
 ## E.2 Permisos de la app
 

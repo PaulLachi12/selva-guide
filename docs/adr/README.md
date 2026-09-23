@@ -9,3 +9,4 @@ Cada ADR registra una decisión técnica, su contexto y sus consecuencias. Para 
 | [0003](./0003-permisos-solo-al-usar.md) | Permisos solo al usar la función, sin ubicación en segundo plano | Aceptada |
 | [0004](./0004-tema-con-paleta-dinamica.md) | Modo oscuro con paleta dinámica y `useThemedStyles` | Aceptada |
 | [0005](./0005-puntos-en-backend-con-cache.md) | Puntos turísticos en el backend con caché local | Propuesta |
+| [0006](./0006-migracion-gradual-a-typescript.md) | Migración gradual a TypeScript | Aceptada |

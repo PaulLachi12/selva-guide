@@ -3,7 +3,7 @@ import * as Location from 'expo-location';
 import i18n from '../i18n';
 
 // Muestra una explicación antes del diálogo del sistema. Resuelve true si el usuario acepta.
-function explicar(titulo, mensaje) {
+function explicar(titulo: string, mensaje: string): Promise<boolean> {
   return new Promise((resolve) => {
     Alert.alert(titulo, mensaje, [
       { text: i18n.t('permisos.ahora_no'), style: 'cancel', onPress: () => resolve(false) },
@@ -13,7 +13,7 @@ function explicar(titulo, mensaje) {
 }
 
 // Estado actual de la ubicación sin mostrar ningún diálogo.
-export async function ubicacionConcedida() {
+export async function ubicacionConcedida(): Promise<boolean> {
   try {
     const { status } = await Location.getForegroundPermissionsAsync();
     return status === 'granted';
@@ -24,7 +24,7 @@ export async function ubicacionConcedida() {
 
 // Pide la ubicación "mientras se usa la app" solo cuando hace falta (al trazar una ruta).
 // Devuelve true si está concedida. Nunca pide ubicación en segundo plano.
-export async function pedirUbicacion() {
+export async function pedirUbicacion(): Promise<boolean> {
   const actual = await Location.getForegroundPermissionsAsync();
   if (actual.status === 'granted') return true;
 

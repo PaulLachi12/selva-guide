@@ -31,16 +31,17 @@ Tipos: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `style`.
 - En mobile, adjunta capturas en modo claro y oscuro.
 - Pide revisión a un compañero antes de hacer merge.
 - No hagas merge con conflictos ni con el CI en rojo.
-- Antes de abrir el PR, en `mobile/` corre `npm run check:i18n`.
+- Antes de abrir el PR, en `mobile/` corre `npm run typecheck` y `npm run check:i18n`.
 
 ## 5. Reglas de la app móvil
 
 Resumen de [`docs/C-arquitectura-mobile.md`](./docs/C-arquitectura-mobile.md):
 
+- Archivos nuevos en TypeScript (`.ts`/`.tsx`); `npm run typecheck` debe pasar.
 - Sin colores sueltos: usa `useThemedStyles` y la paleta de `src/theme.js`.
 - Sin textos sueltos: usa `t('clave')` y agrega la clave en los 4 idiomas.
 - Contenido de lugares con `usePuntoTexto()`.
-- Permisos solo con `src/services/permisos.js` y solo al usar la función.
+- Permisos solo con `src/services/permisos.ts` y solo al usar la función.
 - Solo lugares reales; si un dato es aproximado, marca `verificar: true`.
 
 ## 6. Levantar el proyecto

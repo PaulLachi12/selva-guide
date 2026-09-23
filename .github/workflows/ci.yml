@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   mobile:
-    name: Mobile (traducciones y bundle Android)
+    name: Mobile (tipos, traducciones y bundle Android)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -24,6 +24,8 @@ jobs:
           cache: npm
           cache-dependency-path: mobile/package-lock.json
       - run: npm ci
+      - name: Tipos (TypeScript)
+        run: npm run typecheck
       - name: Traducciones completas en es, en, fr y pt
         run: npm run check:i18n
       - name: Bundle de Android compila

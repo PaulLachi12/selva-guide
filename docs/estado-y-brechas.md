@@ -6,7 +6,8 @@
 
 | Puerta | Comando | Resultado |
 | --- | --- | --- |
-| Traducciones completas (es, en, fr, pt) | `npm run check:i18n` en `mobile/` | Pasa: 410 claves, 29 archivos |
+| Tipos (TypeScript) | `npm run typecheck` en `mobile/` | Pasa |
+| Traducciones completas (es, en, fr, pt) | `npm run check:i18n` en `mobile/` | Pasa: 410 claves, 30 archivos |
 | Bundle de Android | `npm run check:bundle` en `mobile/` | Pasa |
 | Sintaxis del backend | `node --check` en el CI | En el CI |
 | Build del panel web | `npm run build` en `client/` | En el CI |

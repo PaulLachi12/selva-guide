@@ -14,6 +14,7 @@
 | Datos locales | expo-sqlite (incluye `expo-sqlite/kv-store`) |
 | Sesión | expo-secure-store |
 | Voz | expo-speech (audioguía) |
+| Lenguaje | JavaScript migrando a TypeScript ([ADR-0006](./adr/0006-migracion-gradual-a-typescript.md)) |
 
 ## C.2 Estructura
 
@@ -30,12 +31,18 @@ mobile/
 │  ├─ context/              # AuthContext, ThemeContext
 │  ├─ data/puntosData.js    # Puntos turísticos y tarifa de mototaxi (temporal, ver doc D)
 │  ├─ i18n/                 # index.js, locales.js, contenido.js, locales/{es,en,fr,pt}.json
-│  ├─ services/             # api.js, permisos.js, navegacion.js
+│  ├─ services/             # api.js, permisos.ts, navegacion.js
+│  ├─ types/                # modelos.ts: tipos centrales (Punto, Ruta, ...)
 │  └─ theme.js              # Paletas clara y oscura, espacios, radios
 └─ locales/                 # Textos de permisos de iOS por idioma
 ```
 
 ## C.3 Convenciones obligatorias
+
+### TypeScript
+- Todo archivo nuevo se escribe en `.ts` o `.tsx`, con los tipos de `src/types/modelos.ts`.
+- Si modificas una pantalla `.jsx`, conviene migrarla a `.tsx` en el mismo PR.
+- `npm run typecheck` debe pasar (el CI lo revisa).
 
 ### Colores y modo oscuro
 - Nunca uses colores sueltos. Usa la paleta de `src/theme.js`.
@@ -66,7 +73,7 @@ const tp = usePuntoTexto();
 - Las traducciones de puntos viven en `puntos.<id>.<campo>`. Si falta una, se muestra el español.
 
 ### Permisos
-- Pide permisos solo con `src/services/permisos.js` y solo al usar la función (documento E).
+- Pide permisos solo con `src/services/permisos.ts` y solo al usar la función (documento E).
 - Nunca pidas ubicación en segundo plano.
 
 ### Datos turísticos

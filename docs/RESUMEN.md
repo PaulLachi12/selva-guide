@@ -36,6 +36,7 @@ Las fases 2 y Login pueden avanzar en paralelo. La Fase 3 depende de Login.
 - Rutas con OSRM público, sin costo ni API key ([ADR-0001](./adr/0001-rutas-con-osrm.md)).
 - Traducciones de interfaz y contenido con i18next ([ADR-0002](./adr/0002-traducciones-de-contenido.md)).
 - Permisos solo al usar la función ([ADR-0003](./adr/0003-permisos-solo-al-usar.md)).
+- Migración gradual a TypeScript, con `typecheck` en el CI ([ADR-0006](./adr/0006-migracion-gradual-a-typescript.md)).
 - Puntos turísticos al backend con caché local (propuesta, [ADR-0005](./adr/0005-puntos-en-backend-con-cache.md)).
 
 ## Riesgos principales
