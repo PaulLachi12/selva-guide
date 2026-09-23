@@ -1,7 +1,7 @@
 // Sistema de diseño de Selva Guía: colores, espacios, radios y tipografía.
 // Usa siempre estos valores en lugar de colores sueltos en cada pantalla.
 
-export const colors = {
+export const lightColors = {
   primary: '#1F4D3A', // verde selva
   primaryDark: '#163829',
   primarySoft: '#E8F0EB',
@@ -22,6 +22,32 @@ export const colors = {
   textSubtle: '#8C928D',
   onPrimary: '#FFFFFF',
 };
+
+// Modo oscuro estilo WhatsApp: fondos casi negros azulados y verde solo en acentos.
+export const darkColors = {
+  primary: '#00A884', // verde WhatsApp: botones, tabs activas, chips activos
+  primaryDark: '#005C4B',
+  primarySoft: '#0B3B33', // fondo de chips/badges seleccionados
+  accent: '#25D366', // tarifas y datos destacados
+  accentSoft: '#103529',
+  danger: '#F15C6D',
+  dangerSoft: '#3B1A20',
+  warning: '#FFB02E',
+  star: '#FFD279',
+
+  bg: '#0B141A', // fondo general
+  surface: '#111B21', // tarjetas, tab bar, bottom sheet
+  surfaceMuted: '#202C33', // buscador, inputs, chips inactivos
+  border: '#222D34',
+
+  text: '#E9EDEF',
+  textMuted: '#8696A0',
+  textSubtle: '#667781',
+  onPrimary: '#FFFFFF',
+};
+
+// Paleta clara por defecto. Las pantallas con modo oscuro usan useTheme().colors.
+export const colors = lightColors;
 
 // Color por categoría de punto (mapa, chips, etiquetas)
 export const categoryColors = {

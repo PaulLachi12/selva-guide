@@ -1,0 +1,5 @@
+{
+  "NSLocationWhenInUseUsageDescription": "SelvaGuide utilise votre position uniquement pendant l'utilisation de l'app, pour tracer l'itinéraire vers le lieu choisi.",
+  "NSCameraUsageDescription": "SelvaGuide utilise l'appareil photo uniquement pour les photos jointes à vos avis.",
+  "NSPhotoLibraryUsageDescription": "SelvaGuide accède à vos photos uniquement pour les joindre à vos avis."
+}

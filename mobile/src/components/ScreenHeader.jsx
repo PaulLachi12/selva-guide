@@ -1,16 +1,21 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
-import { colors, space } from '../theme';
+import { space } from '../theme';
+import { useTheme, useThemedStyles } from '../context/ThemeContext';
 
 // Cabecera estándar de pantalla: botón de menú, título y subtítulo opcional.
 export default function ScreenHeader({ title, subtitle, onMenu, right, embedded = false }) {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(crearEstilos);
   return (
     <View style={[styles.wrap, { paddingTop: insets.top + space.sm }, embedded && { paddingHorizontal: 0, paddingBottom: space.sm }]}>
       <View style={styles.row}>
         {onMenu ? (
-          <Pressable onPress={onMenu} hitSlop={10} style={styles.menu} accessibilityLabel="Abrir menú">
+          <Pressable onPress={onMenu} hitSlop={10} style={styles.menu} accessibilityLabel={t('comun.abrir_menu')}>
             <Icon name="menu" size={24} color={colors.text} />
           </Pressable>
         ) : null}
@@ -23,7 +28,7 @@ export default function ScreenHeader({ title, subtitle, onMenu, right, embedded 
   );
 }
 
-const styles = StyleSheet.create({
+const crearEstilos = (colors) => StyleSheet.create({
   wrap: {
     backgroundColor: colors.bg,
     paddingHorizontal: space.lg,

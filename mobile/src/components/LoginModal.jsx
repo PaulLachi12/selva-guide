@@ -6,13 +6,16 @@ import * as Haptics from 'expo-haptics';
 import { useAuth } from '../context/AuthContext';
 import GlassView from './GlassView';
 import Icon from './Icon';
-import { colors, space, radius, shadow } from '../theme';
+import { useTheme, useThemedStyles } from '../context/ThemeContext';
+import { space, radius, shadow } from '../theme';
 
 // Pantalla de login estilo iOS: San Francisco es la fuente de sistema por defecto en
 // RN/iOS (no requiere fontFamily explícito), glass + sombras suaves, safe area del notch.
 export default function LoginModal({ visible, onClose }) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useThemedStyles(crearEstilos);
   const { loginConApple, loginConGoogle, entrarComoInvitado } = useAuth();
   const [cargando, setCargando] = useState(null); // 'apple' | 'google' | 'invitado' | null
 
@@ -31,13 +34,13 @@ export default function LoginModal({ visible, onClose }) {
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <GlassView tint="dark" style={StyleSheet.absoluteFill} pointerEvents="none" />
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={t('login.cerrar')} />
 
         <View style={[styles.card, { paddingBottom: insets.bottom + space.lg }]}>
           <View style={styles.handle} />
 
-          <Text style={styles.titulo}>Selva Guía</Text>
-          <Text style={styles.subtitulo}>Iquitos, Loreto</Text>
+          <Text style={styles.titulo}>{t('login.titulo')}</Text>
+          <Text style={styles.subtitulo}>{t('login.subtitulo')}</Text>
 
           <Pressable
             onPress={() => manejar('apple', loginConApple)}
@@ -45,10 +48,10 @@ export default function LoginModal({ visible, onClose }) {
             disabled={!!cargando}
           >
             {cargando === 'apple' ? (
-              <ActivityIndicator color={colors.onPrimary} />
+              <ActivityIndicator color="#FFFFFF" />
             ) : (
               <>
-                <Icon name="logo-apple" size={18} color={colors.onPrimary} />
+                <Icon name="logo-apple" size={18} color="#FFFFFF" />
                 <Text style={styles.btnTextoOscuro}>{t('continuar_apple')}</Text>
               </>
             )}
@@ -82,9 +85,7 @@ export default function LoginModal({ visible, onClose }) {
           </Pressable>
 
           <Text style={styles.nota}>
-            {Platform.OS === 'ios'
-              ? 'Apple/Google: demo local mientras se configuran las credenciales OAuth.'
-              : 'Apple/Google: demo local (disponibles al configurar credenciales OAuth).'}
+            {Platform.OS === 'ios' ? t('login.nota_ios') : t('login.nota_android')}
           </Text>
         </View>
       </View>
@@ -92,7 +93,7 @@ export default function LoginModal({ visible, onClose }) {
   );
 }
 
-const styles = StyleSheet.create({
+const crearEstilos = (colors) => StyleSheet.create({
   overlay: { flex: 1, justifyContent: 'flex-end' },
   card: {
     backgroundColor: colors.surface,
@@ -122,9 +123,9 @@ const styles = StyleSheet.create({
     marginBottom: space.md,
     ...shadow.sm,
   },
-  btnApple: { backgroundColor: '#000' },
+  btnApple: { backgroundColor: '#000', borderWidth: 1, borderColor: colors.border }, // color de marca Apple
   btnGoogle: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
-  btnTextoOscuro: { color: colors.onPrimary, fontWeight: '600', fontSize: 16 },
+  btnTextoOscuro: { color: '#FFFFFF', fontWeight: '600', fontSize: 16 },
   btnTextoClaro: { color: colors.text, fontWeight: '600', fontSize: 16 },
   btnInvitado: { alignItems: 'center', paddingVertical: space.md },
   btnInvitadoTexto: { color: colors.textMuted, fontWeight: '600', fontSize: 14, textDecorationLine: 'underline' },

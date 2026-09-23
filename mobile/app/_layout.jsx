@@ -1,10 +1,11 @@
-﻿import { Suspense } from 'react';
+import { Suspense } from 'react';
 import { View, Text, ActivityIndicator, StatusBar } from 'react-native';
 import { SQLiteProvider } from 'expo-sqlite';
 import { Stack } from 'expo-router';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../src/i18n';
 import { AuthProvider } from '../src/context/AuthContext';
+import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
 
 async function migrar(db) {
   await db.execAsync(`
@@ -61,6 +62,16 @@ async function migrar(db) {
   }
 }
 
+function RaizConTema() {
+  const { colors, isDark } = useTheme();
+  return (
+    <>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.bg} />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
+    </>
+  );
+}
+
 export default function Layout() {
   return (
     <Suspense fallback={
@@ -71,10 +82,11 @@ export default function Layout() {
     }>
       <I18nextProvider i18n={i18n}>
         <AuthProvider>
-          <SQLiteProvider databaseName="selvaguide.db" onInit={migrar} useSuspense>
-            <StatusBar barStyle="dark-content" backgroundColor="#F4F1EA" />
-            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#F4F1EA' } }} />
-          </SQLiteProvider>
+          <ThemeProvider>
+            <SQLiteProvider databaseName="selvaguide.db" onInit={migrar} useSuspense>
+              <RaizConTema />
+            </SQLiteProvider>
+          </ThemeProvider>
         </AuthProvider>
       </I18nextProvider>
     </Suspense>

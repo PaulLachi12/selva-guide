@@ -11,16 +11,16 @@ import DetallePuntoModal from '../../src/components/DetallePuntoModal';
 import DrawerMenuModal from '../../src/components/DrawerMenuModal';
 import ScreenHeader from '../../src/components/ScreenHeader';
 import Icon from '../../src/components/Icon';
-import { colors, space, radius, shadow } from '../../src/theme';
+import { useTranslation } from 'react-i18next';
+import { useThemedStyles } from '../../src/context/ThemeContext';
+import { usePuntoTexto } from '../../src/i18n/contenido';
 
-const VERDE_N = colors.primary;
-const VERDE_B = colors.primary;
-const BLANCO = colors.surface;
-const TINTA = colors.text;
-const GRIS = colors.textMuted;
-const CREMA = colors.bg;
+const FILTROS = ['todas', 'extremo', 'naturaleza'];
 
 export default function ExperienciasScreen() {
+  const { t } = useTranslation();
+  const tp = usePuntoTexto();
+  const styles = useThemedStyles(crearEstilos);
   const puntos = obtenerPuntos();
   const experiencias = puntos.filter(
     (p) => p.categoria === 'deportivo' || p.categoria === 'turistico'
@@ -47,16 +47,13 @@ export default function ExperienciasScreen() {
     <View style={styles.contenedor}>
       {/* Header con botón Drawer */}
       <View style={styles.header}>
-        <ScreenHeader embedded title="Rutas y experiencias" subtitle="Excursiones, paseos por el río y selva" onMenu={() => setDrawerVisible(true)} />
+        <ScreenHeader embedded title={t('rutas.titulo')} subtitle={t('rutas.subtitulo')} onMenu={() => setDrawerVisible(true)} />
       </View>
 
       {/* Filtros */}
       <View style={styles.filtrosRow}>
-        {[
-          { key: 'todas', label: 'Todas las Rutas' },
-          { key: 'extremo', label: 'Adrenalina / Off-Road' },
-          { key: 'naturaleza', label: 'Naturaleza & Reserva' },
-        ].map((f) => {
+        {FILTROS.map((key) => {
+          const f = { key, label: t(`rutas.filtro_${key}`) };
           const act = filtro === f.key;
           return (
             <Pressable
@@ -81,24 +78,31 @@ export default function ExperienciasScreen() {
           >
             <View style={styles.cardTop}>
               <View style={[styles.badge, item.categoria === 'deportivo' ? styles.badgeExtremo : styles.badgeNaturaleza]}>
-                <Text style={styles.badgeTexto}>
-                  {item.categoria === 'deportivo' ? ' Adrenalina' : ' Naturaleza'}
+                <Text style={styles.badgeTexto} numberOfLines={1}>
+                  {item.categoria === 'deportivo' ? t('rutas.badge_adrenalina') : t('rutas.badge_naturaleza')}
                 </Text>
               </View>
-              <Text style={styles.dificultadTexto}>Nivel: {item.dificultad}</Text>
             </View>
 
-            <Text style={styles.cardTitulo}>{item.nombre}</Text>
-            <Text style={styles.cardDesc}>{item.descripcionCorta}</Text>
-
-            <View style={styles.infoRow}>
-              <Text style={styles.infoItem}>⏱ {item.horario || 'Diario'}</Text>
-              <Text style={styles.infoItem}>{item.distancia}</Text>
-            </View>
+            <Text style={styles.cardTitulo} numberOfLines={2} ellipsizeMode="tail">{tp(item, 'nombre')}</Text>
+            <Text style={styles.cardDesc} numberOfLines={2} ellipsizeMode="tail">{tp(item, 'descripcionCorta')}</Text>
 
             <View style={styles.footerCard}>
-              <Text style={styles.costoTexto}>{item.costo}</Text>
-              <Text style={styles.btnAccion}>Explorar ruta →</Text>
+              <View style={styles.infoRow}>
+                <Text style={[styles.costoTexto, styles.textoFlexible]} numberOfLines={1} ellipsizeMode="tail">
+                  {tp(item, 'costo')}
+                </Text>
+                <Text style={[styles.infoItem, styles.textoFlexible, { textAlign: 'right' }]} numberOfLines={1} ellipsizeMode="tail">
+                  {tp(item, 'distancia')}
+                </Text>
+              </View>
+              <Text style={styles.infoItem} numberOfLines={1} ellipsizeMode="tail">⏱ {tp(item, 'horario') || t('rutas.diario')}</Text>
+              <Pressable
+                onPress={() => abrirDetalle(item)}
+                style={styles.btnAccion}
+              >
+                <Text style={styles.btnAccionTexto}>{t('rutas.explorar_como_llegar')}</Text>
+              </Pressable>
             </View>
           </Pressable>
         ))}
@@ -121,10 +125,10 @@ export default function ExperienciasScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const crearEstilos = (colors) => StyleSheet.create({
   contenedor: {
     flex: 1,
-    backgroundColor: CREMA,
+    backgroundColor: colors.bg,
   },
   header: {
     backgroundColor: colors.bg,
@@ -134,27 +138,29 @@ const styles = StyleSheet.create({
   btnMenu: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: colors.surfaceMuted,
   },
   btnMenuTexto: {
     fontSize: 20,
-    color: BLANCO,
+    color: colors.text,
     fontWeight: '700',
   },
   headerTitulo: {
     fontSize: 20,
     fontWeight: '700',
-    color: BLANCO,
+    color: colors.text,
   },
   headerSub: {
     fontSize: 12,
-    color: '#A7F3D0',
+    color: colors.textMuted,
     marginTop: 4,
   },
   filtrosRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    rowGap: 8,
     padding: 12,
-    backgroundColor: BLANCO,
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
@@ -166,21 +172,21 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   btnFiltroActivo: {
-    backgroundColor: VERDE_B,
+    backgroundColor: colors.primary,
   },
   filtroTexto: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#475569',
+    color: colors.textMuted,
   },
   filtroTextoActivo: {
-    color: BLANCO,
+    color: colors.onPrimary,
   },
   scroll: {
     flex: 1,
   },
   card: {
-    backgroundColor: BLANCO,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     marginBottom: 14,
@@ -202,45 +208,43 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   badgeExtremo: {
-    backgroundColor: '#FFE4E6',
+    backgroundColor: colors.dangerSoft,
   },
   badgeNaturaleza: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: colors.primarySoft,
   },
   badgeTexto: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#1E293B',
-  },
-  dificultadTexto: {
-    fontSize: 11,
-    color: GRIS,
+    color: colors.text,
   },
   cardTitulo: {
     fontSize: 17,
     fontWeight: '700',
-    color: TINTA,
+    color: colors.text,
     marginTop: 8,
   },
   cardDesc: {
     fontSize: 13,
-    color: GRIS,
+    color: colors.textMuted,
     marginTop: 4,
     lineHeight: 18,
   },
   infoRow: {
     flexDirection: 'row',
-    marginTop: 10,
-    gap: 14,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+  },
+  textoFlexible: {
+    flexShrink: 1,
   },
   infoItem: {
     fontSize: 12,
-    color: '#334155',
+    color: colors.text,
   },
   footerCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    gap: 6,
     marginTop: 14,
     borderTopWidth: 1,
     borderTopColor: colors.surfaceMuted,
@@ -249,11 +253,19 @@ const styles = StyleSheet.create({
   costoTexto: {
     fontSize: 12,
     fontWeight: '700',
-    color: VERDE_N,
+    color: colors.primary,
   },
   btnAccion: {
-    fontSize: 12,
+    width: '100%',
+    marginTop: 8,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+  },
+  btnAccionTexto: {
+    fontSize: 13,
     fontWeight: '700',
-    color: VERDE_B,
+    color: colors.onPrimary,
   },
 });

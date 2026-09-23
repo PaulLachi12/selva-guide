@@ -11,16 +11,14 @@ import DetallePuntoModal from '../../src/components/DetallePuntoModal';
 import DrawerMenuModal from '../../src/components/DrawerMenuModal';
 import ScreenHeader from '../../src/components/ScreenHeader';
 import Icon from '../../src/components/Icon';
-import { colors, space, radius, shadow } from '../../src/theme';
-
-const VERDE_N = colors.primary;
-const VERDE_B = colors.primary;
-const BLANCO = colors.surface;
-const TINTA = colors.text;
-const GRIS = colors.textMuted;
-const CREMA = colors.bg;
+import { useTranslation } from 'react-i18next';
+import { useThemedStyles } from '../../src/context/ThemeContext';
+import { usePuntoTexto } from '../../src/i18n/contenido';
 
 export default function ResenasScreen() {
+  const { t } = useTranslation();
+  const tp = usePuntoTexto();
+  const styles = useThemedStyles(crearEstilos);
   const [puntos, setPuntos] = useState(obtenerPuntos());
   const [puntoSeleccionado, setPuntoSeleccionado] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -38,7 +36,7 @@ export default function ResenasScreen() {
         todasResenas.push({
           ...r,
           lugarId: p.id,
-          lugarNombre: p.nombre,
+          lugarNombre: tp(p, 'nombre'),
           lugarCategoria: p.categoria,
           puntoCompleto: p,
         });
@@ -55,7 +53,7 @@ export default function ResenasScreen() {
     <View style={styles.contenedor}>
       {/* Header con botón Drawer */}
       <View style={styles.header}>
-        <ScreenHeader embedded title="Reseñas" subtitle="Opiniones de viajeros en Iquitos" onMenu={() => setDrawerVisible(true)} />
+        <ScreenHeader embedded title={t('resenas.titulo')} subtitle={t('resenas.subtitulo')} onMenu={() => setDrawerVisible(true)} />
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
@@ -68,7 +66,7 @@ export default function ResenasScreen() {
               <Text style={styles.lugarNombre} numberOfLines={1}>
                  {resena.lugarNombre}
               </Text>
-              <Text style={styles.lugarLink}>Ver lugar →</Text>
+              <Text style={styles.lugarLink}>{t('resenas.ver_lugar')}</Text>
             </Pressable>
 
             <View style={styles.autorRow}>
@@ -77,9 +75,9 @@ export default function ResenasScreen() {
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
                 <Text style={styles.autorNombre}>{resena.autor}</Text>
-                <Text style={styles.fecha}>{resena.fecha || 'Reciente'}</Text>
+                <Text style={styles.fecha}>{resena.fecha || t('resenas.reciente')}</Text>
               </View>
-              <Text style={styles.ratingStars}>{''.repeat(resena.rating || 5)}</Text>
+              <Text style={styles.ratingStars}>{'★'.repeat(resena.rating || 5)}</Text>
             </View>
 
             <Text style={styles.comentario}>"{resena.comentario}"</Text>
@@ -104,10 +102,10 @@ export default function ResenasScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const crearEstilos = (colors) => StyleSheet.create({
   contenedor: {
     flex: 1,
-    backgroundColor: CREMA,
+    backgroundColor: colors.bg,
   },
   header: {
     backgroundColor: colors.bg,
@@ -117,28 +115,28 @@ const styles = StyleSheet.create({
   btnMenu: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: colors.surfaceMuted,
   },
   btnMenuTexto: {
     fontSize: 20,
-    color: BLANCO,
+    color: colors.text,
     fontWeight: '700',
   },
   headerTitulo: {
     fontSize: 20,
     fontWeight: '700',
-    color: BLANCO,
+    color: colors.text,
   },
   headerSub: {
     fontSize: 12,
-    color: '#A7F3D0',
+    color: colors.textMuted,
     marginTop: 4,
   },
   scroll: {
     flex: 1,
   },
   card: {
-    backgroundColor: BLANCO,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     marginBottom: 14,
@@ -162,13 +160,13 @@ const styles = StyleSheet.create({
   lugarNombre: {
     fontSize: 12,
     fontWeight: '700',
-    color: VERDE_N,
+    color: colors.primary,
     flex: 1,
   },
   lugarLink: {
     fontSize: 11,
     fontWeight: '700',
-    color: VERDE_B,
+    color: colors.primary,
     marginLeft: 8,
   },
   autorRow: {
@@ -180,31 +178,31 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: VERDE_B,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
-    color: BLANCO,
+    color: colors.onPrimary,
     fontWeight: '700',
     fontSize: 14,
   },
   autorNombre: {
     fontSize: 14,
     fontWeight: '700',
-    color: TINTA,
+    color: colors.text,
   },
   fecha: {
     fontSize: 11,
-    color: GRIS,
+    color: colors.textMuted,
   },
   ratingStars: {
     fontSize: 14,
-    color: '#EAB308',
+    color: colors.star,
   },
   comentario: {
     fontSize: 13,
-    color: '#334155',
+    color: colors.text,
     lineHeight: 19,
     fontStyle: 'italic',
   },

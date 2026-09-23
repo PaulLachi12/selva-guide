@@ -149,9 +149,10 @@ export const PUNTOS_INICIALES = [
   },
   {
     id: 3,
-    nombre: 'Barrio Flotante de Belén y Pasaje Paquito',
+    nombre: 'Pasaje Paquito y Mercado de Belén',
     categoria: 'turistico',
-    subcategoria: 'Cultural / Vivencial',
+    subcategoria: 'Turismo / Cultura',
+    tarifaDesdePlaza: 'S/ 3.00 - S/ 4.00',
     calle: 'Pasaje Paquito / Calle Ramirez Hurtado',
     direccion: 'Baja al Río Itaya, Distrito de Belén',
     lat: -3.758,
@@ -173,8 +174,9 @@ export const PUNTOS_INICIALES = [
   },
   {
     id: 4,
-    nombre: 'Complejo Turístico CREA (Manatíes)',
-    categoria: 'recreativo',
+    nombre: 'Centro de Rescate Amazónico (CREA)',
+    categoria: 'turistico',
+    tarifaDesdePlaza: 'S/ 20.00 - S/ 25.00',
     subcategoria: 'Conservación / Rescate de Fauna',
     calle: 'Carretera Iquitos Nauta Km 13.5',
     direccion: 'Carretera Iquitos-Nauta Km 13.5',
@@ -485,7 +487,8 @@ export const PUNTOS_INICIALES = [
   },
   {
     id: 506,
-    nombre: 'Pilpintuwasi (Mariposario de Padre Cocha)',
+    nombre: 'Mariposario Pilpintuwasi & Padre Cocha',
+    tarifaDesdePlaza: 'S/ 5.00 - S/ 7.00 hasta Bellavista Nanay + bote',
     categoria: 'turistico',
     subcategoria: 'Naturaleza / Fauna',
     calle: 'Padre Cocha (acceso fluvial)',
@@ -503,6 +506,53 @@ export const PUNTOS_INICIALES = [
     recomendaciones: 'Combinar la visita con Bellavista Nanay y llevar cámara: las mariposas son más activas en horas de sol.',
     audio: 'Pilpintuwasi es un santuario donde la Amazonía protege a sus mariposas y a la fauna que el tráfico ilegal dejó sin hogar.',
     rating: 4.8,
+    resenas: []
+  },
+  {
+    id: 507,
+    nombre: 'Puente Nanay y Mirador',
+    categoria: 'turistico',
+    subcategoria: 'Mirador / Vista al Río',
+    calle: 'Puente Nanay (Carretera Iquitos - Bellavista)',
+    direccion: 'Puente sobre el río Nanay, norte de Iquitos',
+    lat: -3.7080,
+    lng: -73.2630,
+    distancia: '~5 km de Plaza de Armas',
+    acceso: 'Mototaxi desde el centro (15 min)',
+    tarifaDesdePlaza: 'S/ 5.00 - S/ 7.00',
+    costo: 'Acceso libre',
+    dificultad: 'Fácil',
+    horario: 'Mejor al atardecer (5:30 PM - 6:30 PM)',
+    telefono: '+51965842100',
+    descripcionCorta: 'Vista panorámica sobre el río Nanay, ideal para ver el atardecer amazónico.',
+    descripcionLarga: 'El puente más largo del Perú cruza el río Nanay y une Iquitos con las comunidades del norte. Desde su mirador se ve el río, la selva inundable y los botes que llegan a Bellavista Nanay, con atardeceres de colores intensos.',
+    recomendaciones: 'Ir al atardecer, llevar repelente y agua. Acordar con el mototaxista el regreso o la espera.',
+    audio: 'El Puente Nanay conecta Iquitos con la otra orilla del río. Desde aquí el horizonte de selva y agua se tiñe de naranja cada tarde.',
+    rating: 4.7,
+    resenas: []
+  },
+  {
+    id: 508,
+    nombre: 'Museo Barco Histórico Ayapua',
+    categoria: 'turistico',
+    subcategoria: 'Museo / Historia del Caucho',
+    tieneAudioGuia: true,
+    calle: 'Plaza Castilla / Malecón Maldonado',
+    direccion: 'Plaza Castilla, cerca del Malecón de Iquitos',
+    lat: -3.7446,
+    lng: -73.2455,
+    distancia: '~0.7 km de Plaza de Armas',
+    acceso: 'A pie o mototaxi corto desde la Plaza de Armas',
+    tarifaDesdePlaza: 'S/ 3.00 - S/ 4.00',
+    costo: 'Entrada S/ 20 aprox.',
+    dificultad: 'Muy fácil',
+    horario: 'Todos los días 9:00 AM - 7:00 PM',
+    telefono: '+51965842100',
+    descripcionCorta: 'Barco a vapor de 1906, de la época del caucho, convertido en museo flotante.',
+    descripcionLarga: 'El Ayapua es un barco construido en Alemania a inicios del siglo XX que navegó el Amazonas durante el boom del caucho. Hoy es un museo flotante que muestra cómo se vivía y comerciaba en la Amazonía de esa época.',
+    recomendaciones: 'Combinar con el Malecón y la Casa de Fierro. La visita dura unos 45 minutos.',
+    audio: 'A bordo del Ayapua viajamos a la época del caucho, cuando los vapores unían Iquitos con Europa y el río era la única carretera.',
+    rating: 4.7,
     resenas: []
   }
 ];
@@ -522,10 +572,10 @@ export function esHorarioNocturno(fecha = new Date()) {
 // Incluye conversión referencial a USD y recargo nocturno (10 PM - 5 AM).
 export function tarifaMototaxi(distanciaMetros, fecha = new Date()) {
   const km = distanciaMetros / 1000;
-  let min, max, tramo;
-  if (km < 3) { min = 3; max = 4; tramo = 'Corto (< 3 km)'; }
-  else if (km <= 6) { min = 5; max = 7; tramo = 'Medio (3 - 6 km)'; }
-  else { min = 8; max = 12; tramo = 'Largo (> 6 km)'; }
+  let min, max, tramo, tramoKey;
+  if (km < 3) { min = 3; max = 4; tramo = 'Corto (< 3 km)'; tramoKey = 'corto'; }
+  else if (km <= 6) { min = 5; max = 7; tramo = 'Medio (3 - 6 km)'; tramoKey = 'medio'; }
+  else { min = 8; max = 12; tramo = 'Largo (> 6 km)'; tramoKey = 'largo'; }
 
   const nocturno = esHorarioNocturno(fecha);
   const recargo = nocturno ? 1 : 0; // +S/ 1.00 - S/ 2.00, se muestra el mínimo del rango
@@ -544,6 +594,7 @@ export function tarifaMototaxi(distanciaMetros, fecha = new Date()) {
     min: minFinal,
     max: maxFinal,
     tramo,
+    tramoKey,
     nocturno,
     etiqueta: etiquetaBase,
     etiquetaUsd: `~$${usdMin} - $${usdMax} USD`,
